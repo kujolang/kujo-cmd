@@ -9,7 +9,7 @@
     "build": "node scripts/build-release.mjs",
     "prepack": "npm run build",
     "pretest": "npm run build",
-    "test": "node --test tests/catalog.test.mjs tests/runtime.test.mjs tests/setup.test.mjs"
+    "test": "node --test tests/catalog.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs"
   },
   "dependencies": { "@kujolang/kujo-runtime": "1.4.0" },
   "publishConfig": { "access": "public" },

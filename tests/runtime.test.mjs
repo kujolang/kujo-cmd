@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileAbilityState, LocalAbilityRuntime } from "../.generated/local-runtime.mjs";
@@ -32,4 +32,54 @@ test("approval, idempotency, receipts, restart, and cancellation fail closed", a
   const invalidOutput = await invalidOutputRuntime.execute({ abilityId: strictOutput.id, input: { value: "a" }, controls: {} });
   assert.equal(invalidOutput.code, "ability_output_invalid"); assert.equal(invalidOutput.receipt.result, null); assert.equal(invalidOutput.receipt.status, "failed");
   assert.ok((await readFile(join(root, "receipts.jsonl"), "utf8")).trim().split("\n").length >= 5);
+});
+
+test("concurrent keyed approvals execute once across runtime instances", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-race-"));
+  const statePath = join(root, "state.json");
+  const receiptsPath = join(root, "receipts.jsonl");
+  let executions = 0;
+  const ability = { definition, tool: { name: "fixture" }, handler: async (input) => {
+    executions += 1;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 100));
+    return { value: input.value };
+  } };
+  const first = new LocalAbilityRuntime({ abilities: [ability], profiles, profileId: "kujo.profile.test", state: new FileAbilityState({ statePath, receiptsPath }) });
+  const second = new LocalAbilityRuntime({ abilities: [ability], profiles, profileId: "kujo.profile.test", state: new FileAbilityState({ statePath, receiptsPath }) });
+  const input = { value: "race" };
+  const invocationId = "race-run";
+  const approval = await first.requestApproval({ abilityId: definition.id, input, invocationId });
+  const controls = { invocationId, idempotencyKey: "race-key", approvalId: approval.approval_id };
+  const outcomes = await Promise.all([
+    first.execute({ abilityId: definition.id, input, controls }),
+    second.execute({ abilityId: definition.id, input, controls }),
+  ]);
+  assert.equal(executions, 1);
+  assert.equal(outcomes.filter((item) => item.ok).length, 1);
+  assert.equal(outcomes.filter((item) => item.code === "ability_idempotency_in_progress").length, 1);
+  const replay = await second.execute({ abilityId: definition.id, input, controls: { invocationId: "later-run", idempotencyKey: "race-key" } });
+  assert.equal(replay.replayed, true);
+  assert.equal(executions, 1);
+});
+
+test("bounded output and sharded idempotency state prevent unbounded hot files", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-bounds-"));
+  const statePath = join(root, "state.json");
+  const receiptsPath = join(root, "receipts.jsonl");
+  const readDefinition = { ...definition, id: "kujo.test.bounded.read", effects: [{ kind: "read", resource: "kujo.test" }] };
+  const runtime = new LocalAbilityRuntime({
+    abilities: [{ definition: readDefinition, tool: { name: "bounded" }, handler: async (input) => ({ value: input.value }) }],
+    profiles: [{ ...profiles[0], ability_ids: [readDefinition.id] }],
+    profileId: "kujo.profile.test",
+    state: new FileAbilityState({ statePath, receiptsPath }),
+  });
+  const oversized = await runtime.execute({ abilityId: readDefinition.id, input: { value: "x".repeat(300 * 1024) }, controls: { idempotencyKey: "large" } });
+  assert.equal(oversized.code, "ability_output_limit");
+  for (let index = 0; index < 100; index += 1) {
+    const result = await runtime.execute({ abilityId: readDefinition.id, input: { value: String(index) }, controls: { idempotencyKey: `key-${index}` } });
+    assert.equal(result.ok, true);
+  }
+  const stateSize = await stat(statePath).then((entry) => entry.size, (error) => error.code === "ENOENT" ? 0 : Promise.reject(error));
+  assert.ok(stateSize < 4096);
+  assert.equal((await readdir(`${statePath}.d/idempotency`, { recursive: true })).filter((name) => name.endsWith(".json")).length, 101);
 });
