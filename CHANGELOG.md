@@ -8,3 +8,10 @@
 - Preserve effects, approvals, idempotency, identities, receipts, cancellation,
   and restart-safe local state.
 - Add optional loopback-only Watchdog service management.
+- Harden project boundaries against intermediate symlink escapes, forged skill
+  manifests, project-controlled executable paths, unsafe purge roots, and stale
+  Watchdog PID reuse.
+- Add cross-process approval/idempotency locking, sharded idempotency records,
+  bounded and rotated receipts, bounded MCP/command output, and compact receipt
+  summaries.
+- Pin release workflow actions and npm tooling to immutable versions.

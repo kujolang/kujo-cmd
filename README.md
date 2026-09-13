@@ -62,10 +62,20 @@ kujo-cmd uninstall                 # keeps shared sources and receipts
 kujo-cmd uninstall --purge         # removes shared local Kujo CMD data
 ```
 
-Configuration lives in `.kujo/cmd.json`; Command Code reads `.mcp.json`; the
-standard skills projection is `.agents/skills`; shared sources and receipts
-default to `~/.local/share/kujo/cmd`. `KUJO_CMD_HOME` changes the shared data
-root. `KUJO_BIN` can select another compatible Kujo runtime.
+Declarative project configuration lives in `.kujo/cmd.json`; executable and
+source locations are trusted installation metadata under the user-owned Kujo
+CMD data root. Command Code reads `.mcp.json`; the standard skills projection
+is `.agents/skills`; shared sources and receipts default to
+`~/.local/share/kujo/cmd`. `KUJO_CMD_HOME` changes that root. `KUJO_BIN` may
+select a compatible runtime during an explicit `setup` or `update`; projects
+cannot override the installed executable.
+
+Receipt logs rotate at 8 MiB with three local archives. Receipt-list calls
+return summaries by default; pass `include_result: true` only when full prior
+results are needed. Command output, MCP requests, structured results, and
+error details have explicit size limits. Keyed replay records are sharded and
+retain the newest 32 completed calls in each of 256 digest shards; callers must
+not treat an idempotency key as permanent storage.
 
 ## Development and offline setup
 
