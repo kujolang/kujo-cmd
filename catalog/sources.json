@@ -1,0 +1,19 @@
+{
+  "schema": "kujo.cmd.sources/v1",
+  "sources": [
+    {"id":"ability","repo":"kujolang/ability","commit":"63d4367d677ce350bb2756dab02603170ca44cee"},
+    {"id":"scout","repo":"kujolang/scout","commit":"70454d44b3c719bec08f9707b39c231da49b7886"},
+    {"id":"scent","repo":"kujolang/scent","commit":"969f0fdc853c88cd051248a6ebcd9ce0434d9f43"},
+    {"id":"patchbrief","repo":"kujolang/patchbrief","commit":"321d961c19c4ee09713cf1f737ba5e112b0caa5b"},
+    {"id":"changebucket","repo":"kujolang/changebucket","commit":"16491d2badd11a9d641c7c748f853b476a4d1134"},
+    {"id":"shipcheck","repo":"kujolang/shipcheck","commit":"111bfc83c832050877cb9d4fd82908aaf6d14749"},
+    {"id":"dispatch","repo":"kujolang/dispatch","commit":"9eb16c72316744d8a691d9ef5ec5be4f12018408"},
+    {"id":"runledger","repo":"kujolang/runledger","commit":"92cb06344386fc0a78d92b1db92f417edb22b285"},
+    {"id":"watchdog","repo":"kujolang/watchdog","commit":"df36d57e3af9f2c7746bb4ad3b16a7c8e567b42e"},
+    {"id":"rag","repo":"kujolang/rag","commit":"85743f88c152d7c65f59d4697111faf85e36d8eb"},
+    {"id":"fence","repo":"kujolang/fence","commit":"fda049ed9aa55ba50c150b84bb9ca1bdf49af0dc"},
+    {"id":"spec","repo":"kujolang/spec","commit":"1211f37a09314be7150734bf15a55e9b2ea6504d"},
+    {"id":"eval","repo":"kujolang/eval","commit":"7ad5caef1b718ab8a6ccdd02ef1b645af93ac133"},
+    {"id":"kujo-skills","repo":"kujolang/kujo-skills","commit":"e7362c491438c03947fc3219d7b69a517761b319"}
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "schema": "kujo.ability-profile/v1",
+    "id": "kujo.profile.essentials",
+    "version": "1.0.0",
+    "description": "Low-risk catalog, receipts, repository inspection, change summaries, and release scans.",
+    "default": true,
+    "extends": [],
+    "ability_ids": ["kujo.ability.catalog.list", "kujo.ability.receipts.list", "kujo.scout.repository.inspect", "kujo.patchbrief.changes.summarize", "kujo.shipcheck.repository.scan"],
+    "metadata": { "label": "Essentials", "risk": "read-mostly" }
+  },
+  {
+    "schema": "kujo.ability-profile/v1",
+    "id": "kujo.profile.review",
+    "version": "1.0.0",
+    "description": "Architecture, task-contract, context, and change-footprint review tools.",
+    "default": false,
+    "extends": ["kujo.profile.essentials"],
+    "ability_ids": ["kujo.changebucket.changes.measure", "kujo.fence.architecture.check", "kujo.spec.contract.validate", "kujo.scent.context.pack"],
+    "metadata": { "label": "Review", "risk": "local-write" }
+  },
+  {
+    "schema": "kujo.ability-profile/v1",
+    "id": "kujo.profile.ship",
+    "version": "1.0.0",
+    "description": "Verification and durable run evidence for release work.",
+    "default": false,
+    "extends": ["kujo.profile.review"],
+    "ability_ids": ["kujo.eval.suite.run", "kujo.runledger.runs.report"],
+    "metadata": { "label": "Ship", "risk": "execute" }
+  },
+  {
+    "schema": "kujo.ability-profile/v1",
+    "id": "kujo.profile.full",
+    "version": "1.0.0",
+    "description": "All installed local Kujo capabilities, including orchestration, RAG, and optional Watchdog health.",
+    "default": false,
+    "extends": ["kujo.profile.ship"],
+    "ability_ids": ["kujo.dispatch.workflow.validate", "kujo.rag.knowledge.query", "kujo.watchdog.service.health"],
+    "metadata": { "label": "Full", "risk": "advanced" }
+  }
+]
