@@ -28,6 +28,11 @@ test("setup, profiles, repair, and uninstall preserve unrelated host config", as
   assert.equal(updated.profile, "kujo.profile.review");
   assert.deepEqual(updated.disabled, ["kujo.fence.architecture.check"]);
   assert.deepEqual(updated.enabled, ["kujo.eval.suite.run"]);
+  assert.equal(updated.sources, undefined);
+  assert.equal(updated.kujo_bin, undefined);
+  const installation = JSON.parse(await readFile(join(home, "installation.json"), "utf8"));
+  assert.equal(installation.schema, "kujo.cmd.installation/v1");
+  assert.equal(Object.keys(installation.sources).length, catalog.sources.length);
   const mcp = JSON.parse(await readFile(join(project, ".mcp.json"), "utf8")); assert.ok(mcp.mcpServers.existing); assert.equal(mcp.mcpServers.kujo.transport, "stdio");
   await exec(process.execPath, [cli, "repair", "--project", project, "--json"], { env });
   await exec(process.execPath, [cli, "uninstall", "--project", project, "--json"], { env });
