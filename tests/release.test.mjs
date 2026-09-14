@@ -5,8 +5,9 @@ import { promisify } from "node:util";
 
 const exec = promisify(execFile);
 
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const { stdout } = await exec(npm, ["pack", "--dry-run", "--json", "--ignore-scripts"], {
+const npmCli = process.env.npm_execpath;
+assert.ok(npmCli, "npm_execpath is unavailable");
+const { stdout } = await exec(process.execPath, [npmCli, "pack", "--dry-run", "--json", "--ignore-scripts"], {
   maxBuffer: 8 * 1024 * 1024,
 });
 const report = JSON.parse(stdout)[0];
