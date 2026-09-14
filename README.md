@@ -1,8 +1,8 @@
 # Kujo CMD
 
-[![npm](https://img.shields.io/npm/v/@kujolang/kujo-cmd)](https://www.npmjs.com/package/@kujolang/kujo-cmd)
-[![CI](https://github.com/kujolang/kujo-cmd/actions/workflows/ci.yml/badge.svg)](https://github.com/kujolang/kujo-cmd/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.1.4-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.1.4)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+[![built with Kujo](https://img.shields.io/badge/built%20with-Kujo-white.svg)](https://github.com/kujolang/kujo)
 
 Run Kujo tools and Agent Skills inside [Command Code](https://commandcode.ai/).
 Kujo CMD installs everything in your own environment and connects it to the

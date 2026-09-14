@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4 - 2026-09-14
+
+- Match the monochrome README badge system used across Kujo repositories.
+
 ## 0.1.3 - 2026-09-14
 
 - Derive CLI, installation, and MCP server versions from the package manifest
