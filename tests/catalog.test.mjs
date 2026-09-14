@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { loadCatalog, profileAbilities } from "../lib/catalog.mjs";
+import { validateDefinition } from "../.generated/local-runtime.mjs";
 
 test("portable profiles expose a growing catalog without changing installation", async () => {
   const catalog = await loadCatalog();
@@ -12,6 +13,7 @@ test("portable profiles expose a growing catalog without changing installation",
   assert.deepEqual([essentials.length, review.length, ship.length, full.length], [5, 9, 11, 14]);
   assert.equal(new Set(catalog.abilities.map((item) => item.definition.id)).size, catalog.abilities.length);
   for (const item of catalog.abilities) {
+    assert.equal(validateDefinition(item.definition), item.definition);
     assert.match(item.definition.id, /^[a-z0-9][a-z0-9.-]+$/);
     assert.ok(item.definition.effects.length);
     assert.equal(item.definition.input_schema.type, "object");
