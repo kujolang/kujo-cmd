@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 - 2026-09-14
+
+- Move Kujo CMD into its own GitHub repository with preserved package history.
+- Point npm metadata, issues, CI, and releases at `kujolang/kujo-cmd`.
+- Make release builds standalone by verifying a committed, digest-pinned
+  snapshot of the canonical Ability host runtime.
+- Move Command Code research, architecture, security, and release documents
+  with the product.
+
 ## 0.1.1 - 2026-09-13
 
 - Rewrite the npm README around installation, available tools, profiles,

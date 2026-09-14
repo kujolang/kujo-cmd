@@ -1,11 +1,16 @@
-import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const source = resolve(root, "..", "kujo-ability", "lib", "local-runtime.mjs");
-const destination = join(root, ".generated", "local-runtime.mjs");
-await mkdir(dirname(destination), { recursive: true });
-await cp(source, destination);
-const body = await readFile(destination, "utf8");
-await writeFile(join(root, ".generated", "BUILD.json"), `${JSON.stringify({ schema: "kujo.cmd.generated-build/v1", source: "../kujo-ability/lib/local-runtime.mjs", sha256: await crypto.subtle.digest("SHA-256", new TextEncoder().encode(body)).then((value) => Buffer.from(value).toString("hex")) }, null, 2)}\n`);
+const generated = join(root, ".generated", "local-runtime.mjs");
+const manifestPath = join(root, ".generated", "BUILD.json");
+const [body, manifestBody] = await Promise.all([
+  readFile(generated),
+  readFile(manifestPath, "utf8"),
+]);
+const manifest = JSON.parse(manifestBody);
+const actual = createHash("sha256").update(body).digest("hex");
+if (manifest.schema !== "kujo.cmd.generated-build/v1") throw new Error("unsupported generated runtime manifest");
+if (actual !== manifest.sha256) throw new Error(`generated Ability runtime digest mismatch: expected ${manifest.sha256}, received ${actual}`);

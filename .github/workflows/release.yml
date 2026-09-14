@@ -1,0 +1,57 @@
+name: Publish Kujo CMD
+
+on:
+  push:
+    tags:
+      - "v0.*.*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    if: github.repository == 'kujolang/kujo-cmd'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Verify release commit belongs to main
+        shell: bash
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "${GITHUB_SHA}" origin/main
+      - name: Verify release tag matches package version
+        shell: bash
+        run: |
+          package_version="$(node -p "require('./package.json').version")"
+          test "${GITHUB_REF_NAME}" = "v${package_version}"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - name: Use a pinned npm CLI with trusted-publishing support
+        run: npm install --global npm@11.19.0
+      - run: npm ci
+      - run: npm test
+      - name: Check for an identical existing publication
+        id: registry
+        shell: bash
+        run: |
+          package_name="$(node -p "require('./package.json').name")"
+          package_version="$(node -p "require('./package.json').version")"
+          published_version="$(npm view "${package_name}@${package_version}" version --json 2>/dev/null | tr -d '"' || true)"
+          if [[ "${published_version}" = "${package_version}" ]]; then
+            package_diff="$(npm diff --diff="${package_name}@${package_version}" --diff=. --diff-name-only)"
+            test -z "${package_diff}"
+            echo "published=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "published=false" >> "${GITHUB_OUTPUT}"
+          fi
+      - name: Publish public package with provenance
+        if: steps.registry.outputs.published != 'true'
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

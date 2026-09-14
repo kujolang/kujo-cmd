@@ -1,0 +1,8 @@
+{
+  "schema": "kujo.cmd.generated-build/v1",
+  "source_repo": "kujolang/mcp",
+  "source_commit": "c41aa57444a1ee101172ae6c2f7c0c27d0a3957f",
+  "source_path": "integrations/kujo-ability/lib/local-runtime.mjs",
+  "source_url": "https://raw.githubusercontent.com/kujolang/mcp/c41aa57444a1ee101172ae6c2f7c0c27d0a3957f/integrations/kujo-ability/lib/local-runtime.mjs",
+  "sha256": "cbb5935a9f075de40cb5e7c1adb1a07265224069343ad3372a782fd891e4e603"
+}

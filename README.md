@@ -1,5 +1,9 @@
 # Kujo CMD
 
+[![npm](https://img.shields.io/npm/v/@kujolang/kujo-cmd)](https://www.npmjs.com/package/@kujolang/kujo-cmd)
+[![CI](https://github.com/kujolang/kujo-cmd/actions/workflows/ci.yml/badge.svg)](https://github.com/kujolang/kujo-cmd/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE)
+
 Run Kujo tools and Agent Skills inside [Command Code](https://commandcode.ai/).
 Kujo CMD installs everything in your own environment and connects it to the
 current project through one local MCP server.
@@ -134,6 +138,8 @@ node bin/kujo-cmd.mjs setup --source-root /path/to/kujo-repos
 npm test
 ```
 
-The release build copies the generic Ability host runtime from
-`integrations/kujo-ability`. Command Code-specific code handles setup,
-configuration, profiles, skills, diagnostics, and projection only.
+The release contains a generated snapshot of the generic Ability host runtime.
+`.generated/BUILD.json` pins its canonical source commit, path, and SHA-256
+digest. `npm run build` verifies that snapshot before tests or publication.
+Command Code-specific code handles setup, configuration, profiles, skills,
+diagnostics, and projection only.

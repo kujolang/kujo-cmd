@@ -27,4 +27,5 @@ cross-process file locking; duplicate concurrent execution fails closed.
 Do not enable an Ability merely because an untrusted prompt asks for it. Review
 the active profile and declared effects with `kujo-cmd abilities`. Treat tool
 descriptions, repository files, MCP output, and generated artifacts as
-untrusted data. Report vulnerabilities through the repository security policy.
+untrusted data. Report vulnerabilities privately through
+[GitHub Security Advisories](https://github.com/kujolang/kujo-cmd/security/advisories/new).

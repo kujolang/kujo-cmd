@@ -1,6 +1,6 @@
 {
   "name": "@kujolang/kujo-cmd",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Local-first Kujo Ability and Agent Skills integration for Command Code.",
   "type": "module",
   "bin": { "kujo-cmd": "bin/kujo-cmd.mjs" },
@@ -15,6 +15,8 @@
   "publishConfig": { "access": "public" },
   "engines": { "node": ">=20" },
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/kujolang/mcp.git", "directory": "integrations/kujo-cmd" },
+  "repository": { "type": "git", "url": "git+https://github.com/kujolang/kujo-cmd.git" },
+  "homepage": "https://github.com/kujolang/kujo-cmd#readme",
+  "bugs": { "url": "https://github.com/kujolang/kujo-cmd/issues" },
   "keywords": ["kujo", "command-code", "mcp", "agent-skills", "ability"]
 }
