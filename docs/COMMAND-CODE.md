@@ -18,7 +18,7 @@ updates; normal execution is local and works offline.
 To pin a project to this release, include the version:
 
 ```bash
-npx @kujolang/kujo-cmd@0.1.1 setup
+npx @kujolang/kujo-cmd@0.1.4 setup
 ```
 
 ## What appears in Command Code
