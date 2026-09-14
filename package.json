@@ -1,6 +1,6 @@
 {
   "name": "@kujolang/kujo-cmd",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local-first Kujo Ability and Agent Skills integration for Command Code.",
   "type": "module",
   "bin": { "kujo-cmd": "bin/kujo-cmd.mjs" },

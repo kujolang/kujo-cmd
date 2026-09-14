@@ -34,7 +34,7 @@ async function handle(request) {
     const supported = new Set(["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]);
     const requested = params.protocolVersion || "2025-11-25";
     if (!supported.has(requested)) return fail(id, -32602, `unsupported MCP protocol version: ${requested}`);
-    return reply(id, { protocolVersion: requested, capabilities: { tools: { listChanged: false } }, serverInfo: { name: "kujo-cmd", version: "0.1.0" } });
+    return reply(id, { protocolVersion: requested, capabilities: { tools: { listChanged: false } }, serverInfo: { name: "kujo-cmd", version: "0.1.1" } });
   }
   if (method === "ping") return reply(id, {});
   if (method === "tools/list") return reply(id, { tools: [...tools.values()].map((item) => ({ name: item.tool.name, title: item.definition.title, description: item.tool.description, inputSchema: inputSchema(item.definition.input_schema), outputSchema: item.definition.output_schema, annotations: { readOnlyHint: item.definition.effects.every((effect) => effect.kind === "read") }, _meta: { "kujo/abilityId": item.definition.id, "kujo/abilityVersion": item.definition.version, "kujo/abilityDigest": item.definitionDigest, "kujo/effects": item.definition.effects } })) });

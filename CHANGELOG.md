@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 - 2026-09-13
+
+- Rewrite the npm README around installation, available tools, profiles,
+  approvals, receipts, local models, and real Command Code examples.
+- Link the live Command Code launch demo and Ability walkthrough.
+- Publish the documentation and demo updates made since 0.1.0.
+
 ## 0.1.0 - 2026-09-13
 
 - Add one-command local setup for Command Code.

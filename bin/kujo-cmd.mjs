@@ -11,7 +11,7 @@ import { readJson, writeJson } from "../lib/io.mjs";
 import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths } from "../lib/paths.mjs";
 import { run } from "../lib/process.mjs";
 
-const VERSION = "0.1.0";
+const VERSION = "0.1.1";
 const command = process.argv[2] || "help";
 
 function options(values) {
