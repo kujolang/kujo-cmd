@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3 - 2026-09-14
+
+- Derive CLI, installation, and MCP server versions from the package manifest
+  so runtime identity cannot drift from the published package version.
+
 ## 0.1.2 - 2026-09-14
 
 - Move Kujo CMD into its own GitHub repository with preserved package history.

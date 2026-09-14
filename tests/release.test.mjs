@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
+import { VERSION } from "../lib/version.mjs";
 
 const exec = promisify(execFile);
 
@@ -20,18 +21,22 @@ for (const required of [
   "catalog/abilities.json",
   "catalog/profiles.json",
   "catalog/sources.json",
+  "lib/version.mjs",
   "README.md",
   "SECURITY.md",
 ]) assert.ok(files.has(required), `missing ${required}`);
 assert.ok(![...files].some((path) => path.includes("node_modules") || path.endsWith(".tgz")));
 assert.equal(report.name, "@kujolang/kujo-cmd");
-assert.equal(report.version, "0.1.2");
+assert.equal(report.version, VERSION);
 
 const packageJson = JSON.parse(await readFile("package.json", "utf8"));
+assert.equal(VERSION, packageJson.version);
 assert.equal(packageJson.dependencies["@kujolang/kujo-runtime"], "1.4.0");
 assert.equal(packageJson.repository.url, "git+https://github.com/kujolang/kujo-cmd.git");
 assert.equal(packageJson.homepage, "https://github.com/kujolang/kujo-cmd#readme");
 assert.equal(packageJson.bugs.url, "https://github.com/kujolang/kujo-cmd/issues");
+const { stdout: versionOutput } = await exec(process.execPath, ["bin/kujo-cmd.mjs", "--version"]);
+assert.equal(versionOutput.trim(), `kujo-cmd ${packageJson.version}`);
 
 for (const workflowPath of [".github/workflows/ci.yml", ".github/workflows/release.yml"]) {
   const workflow = await readFile(workflowPath, "utf8");

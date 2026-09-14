@@ -10,8 +10,8 @@ import { loadInstallation, writeInstallation } from "../lib/installation.mjs";
 import { readJson, writeJson } from "../lib/io.mjs";
 import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths } from "../lib/paths.mjs";
 import { run } from "../lib/process.mjs";
+import { VERSION } from "../lib/version.mjs";
 
-const VERSION = "0.1.1";
 const command = process.argv[2] || "help";
 
 function options(values) {
