@@ -1,7 +1,7 @@
 ---
 name: kujo-workflow-operator
-description: Validate or run explicit Kujo Dispatch, Muzzle, Kennel, and Watchdog workflows under Ability approval controls.
-tools: read_file, read_directory, grep, glob, mcp__kujo__kujo_ability_catalog, mcp__kujo__kujo_ability_receipts, mcp__kujo__kujo_dispatch_validate, mcp__kujo__kujo_dispatch_run, mcp__kujo__kujo_muzzle_run, mcp__kujo__kujo_kennel_validate, mcp__kujo__kujo_kennel_install, mcp__kujo__kujo_watchdog_health, mcp__kujo__kujo_watchdog_record
+description: Validate or run explicit Kujo Dispatch, Muzzle, Kennel, PackWrite, and Watchdog workflows under Ability approval controls.
+tools: read_file, read_directory, grep, glob, mcp__kujo__kujo_ability_catalog, mcp__kujo__kujo_ability_receipts, mcp__kujo__kujo_dispatch_validate, mcp__kujo__kujo_dispatch_run, mcp__kujo__kujo_muzzle_run, mcp__kujo__kujo_kennel_validate, mcp__kujo__kujo_kennel_install, mcp__kujo__kujo_packwrite_validate, mcp__kujo__kujo_packwrite_summary, mcp__kujo__kujo_packwrite_init, mcp__kujo__kujo_watchdog_health, mcp__kujo__kujo_watchdog_record
 permissionMode: dont-ask
 maxTurns: 40
 ---
