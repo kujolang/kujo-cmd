@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Repin the supported Kujo source set and add CaseFile, Concord, Muzzle, and
+  Kennel to the coordinated local installation.
+- Add approval-gated CaseFile capture, Muzzle execution, Kennel install,
+  Dispatch execution, RAG ingest, and Watchdog telemetry Abilities, plus
+  read-only Concord and Kennel validation.
+- Project a Command Code mod for metadata-only Watchdog correlation, optional
+  RunLedger recording, subagent correlation, and a one-shot Jidoka stop gate.
+- Project four scoped Command Code agents with explicit Kujo MCP allowlists and
+  documented identity and approval boundaries.
 - Verify setup, MCP discovery, skills discovery, and an optional live Kujo tool
   call against an installed Command Code host.
 - Update the bundled Kujo runtime to 1.8.0 and copy the resolved native runtime

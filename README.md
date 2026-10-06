@@ -35,10 +35,14 @@ adapter or another npm package.
 | Fence | Check architecture boundaries |
 | Spec | Validate a task contract |
 | Eval | Run a deterministic evaluation suite |
-| RunLedger | Read and report local agent-run evidence |
-| Dispatch | Validate an agent workflow without running it |
-| RAG | Query a local Kujo index with citations |
-| Watchdog | Check an optional local Watchdog service |
+| RunLedger | Read reports and optionally record correlated Command Code runs |
+| Dispatch | Validate or execute an agent workflow under approval |
+| RAG | Query or ingest a local Kujo index with citations |
+| Watchdog | Check the local service or submit metadata-only correlated telemetry |
+| CaseFile | Capture a redacted evidence bundle from an existing failure log |
+| Concord | Scan repository artifacts for drift |
+| Muzzle | Run a repository workflow with enforced policy and bounded output |
+| Kennel | Validate a package project or install its declared dependencies |
 
 Each call keeps its Ability identity, declared effects, policy decision,
 invocation ID, receipt ID, and any supplied session, run, agent, or model IDs.
@@ -52,9 +56,9 @@ Command Code sees. The default **Essentials** profile exposes five tools.
 | Profile | Tools | Adds |
 |---|---:|---|
 | Essentials | 5 | Catalog, receipts, Scout, PatchBrief, ShipCheck |
-| Review | 9 | ChangeBucket, Fence, Spec, Scent |
-| Ship | 11 | Eval, RunLedger |
-| Full | 14 | Dispatch, RAG, Watchdog |
+| Review | 10 | ChangeBucket, Fence, Spec, Scent, Concord |
+| Ship | 14 | Eval, RunLedger, CaseFile, Watchdog telemetry |
+| Full | 22 | Dispatch execution, RAG ingest, Muzzle, Kennel, and all installed tools |
 
 ```bash
 kujo-cmd profiles
@@ -112,8 +116,21 @@ kujo-cmd uninstall --purge         # remove shared Kujo CMD data
 ```
 
 Setup writes `.mcp.json`, `.kujo/cmd.json`, and the relevant links under
-`.agents/skills`. Shared sources and receipts default to
+`.agents/skills`. It also projects a trust-gated Command Code mod and four
+scoped agents under `.commandcode/`. Their MCP allowlists are explicit and do
+not replace Command Code permission checks or Kujo's request-bound approvals.
+Shared sources and receipts default to
 `~/.local/share/kujo/cmd`. Set `KUJO_CMD_HOME` to move that data root.
+
+The projected mod records metadata-only session, subagent, and Kujo tool
+correlation to loopback Watchdog, spooling a bounded queue under
+`.kujo/watchdog-spool` while Watchdog is unavailable. It applies a one-shot
+Jidoka continuation when a Kujo MCP call fails. Set `KUJO_CMD_JIDOKA=0` to
+disable that gate or `KUJO_CMD_WATCHDOG_URL` to select another HTTPS or
+loopback endpoint. Set `KUJO_CMD_RUNLEDGER=1` to opt into automatic local
+RunLedger start/finish records; it is off by default because it writes project
+run evidence. `WDG_API_AUTH_TOKEN` is read only at delivery time and is never
+written to telemetry or spool files.
 
 Kujo CMD does not choose or proxy your model. Command Code can use any provider
 it supports, including Ollama. The live demos use `ollama/glm-5.3:cloud`.
