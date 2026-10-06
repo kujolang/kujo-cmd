@@ -10,6 +10,6 @@ npm warn Unknown user config "python". This will stop working in the next major 
   "skills": 3,
   "mcp": "enabled",
   "mod": "loaded",
-  "agents": 5,
+  "agents": 6,
   "live": null
 }

@@ -16,7 +16,7 @@ success
 
 ## Commits
 
-- Loop engineering: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
+- Loop engineering: Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering.
 
 ## Remaining
 
