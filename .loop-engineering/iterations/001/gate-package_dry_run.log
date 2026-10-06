@@ -1,0 +1,56 @@
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.2.0 prepack
+> npm run build
+
+npm warn Unknown env config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.2.0 build
+> node scripts/build-release.mjs
+
+npm notice
+npm notice 📦  @kujolang/kujo-cmd@0.2.0
+npm notice Tarball Contents
+npm notice 445B .generated/BUILD.json
+npm notice 24.3kB .generated/local-runtime.mjs
+npm notice 3.6kB CHANGELOG.md
+npm notice 1.1kB LICENSE
+npm notice 8.8kB README.md
+npm notice 2.3kB SECURITY.md
+npm notice 778B assets/command-code/agents/kujo-browser-reviewer.md
+npm notice 750B assets/command-code/agents/kujo-context-builder.md
+npm notice 875B assets/command-code/agents/kujo-decision-reviewer.md
+npm notice 1.0kB assets/command-code/agents/kujo-release-verifier.md
+npm notice 942B assets/command-code/agents/kujo-reviewer.md
+npm notice 1.1kB assets/command-code/agents/kujo-safety-evidence.md
+npm notice 1.1kB assets/command-code/agents/kujo-workflow-operator.md
+npm notice 8.8kB assets/command-code/mods/kujo-command-bridge.ts
+npm notice 5.0kB bin/kujo-cmd-mcp.mjs
+npm notice 20.8kB bin/kujo-cmd.mjs
+npm notice 35.0kB catalog/abilities.json
+npm notice 2.6kB catalog/profiles.json
+npm notice 2.6kB catalog/sources.json
+npm notice 3.2kB lib/app.mjs
+npm notice 2.1kB lib/catalog.mjs
+npm notice 22.4kB lib/executor.mjs
+npm notice 9.3kB lib/install.mjs
+npm notice 3.1kB lib/installation.mjs
+npm notice 1.9kB lib/io.mjs
+npm notice 1.6kB lib/lens.mjs
+npm notice 4.7kB lib/paths.mjs
+npm notice 1.4kB lib/process.mjs
+npm notice 179B lib/version.mjs
+npm notice 1.3kB package.json
+npm notice 6.0kB scripts/check-command-code-host.mjs
+npm notice Tarball Details
+npm notice name: @kujolang/kujo-cmd
+npm notice version: 0.2.0
+npm notice filename: kujolang-kujo-cmd-0.2.0.tgz
+npm notice package size: 44.0 kB
+npm notice unpacked size: 178.9 kB
+npm notice shasum: 12ab223be468bb2ceb02f8407604cece052956f7
+npm notice integrity: sha512-SR0QJvMp+Cp+p[...]LtUneu2JB7bLQ==
+npm notice total files: 31
+npm notice
+kujolang-kujo-cmd-0.2.0.tgz

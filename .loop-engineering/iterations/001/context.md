@@ -1,6 +1,11 @@
 # Context
 
-- objective: Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification.
-- git_head: f1eb3b5
+- objective: Prepare, verify, tag, and publish Kujo CMD 0.2.0 with current Command Code integration and release documentation.
+- git_head: fac3d9b
 - changed_files:
-  - none
+  - .loop-engineering/loop.yml
+  - CHANGELOG.md
+  - README.md
+  - docs/COMMAND-CODE.md
+  - package-lock.json
+  - package.json

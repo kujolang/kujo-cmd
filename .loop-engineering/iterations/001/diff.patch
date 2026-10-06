@@ -1,134 +1,318 @@
 diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
-index b87b0ef..db88b75 100644
+index db88b75..9352109 100644
 --- a/.loop-engineering/iterations/001/context.md
 +++ b/.loop-engineering/iterations/001/context.md
-@@ -1,6 +1,6 @@
+@@ -1,6 +1,11 @@
  # Context
  
- - objective: Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification.
--- git_head: be8c15a
-+- git_head: f1eb3b5
+-- objective: Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification.
+-- git_head: f1eb3b5
++- objective: Prepare, verify, tag, and publish Kujo CMD 0.2.0 with current Command Code integration and release documentation.
++- git_head: fac3d9b
  - changed_files:
--  - .loop-engineering/loop.yml
-+  - none
+-  - none
++  - .loop-engineering/loop.yml
++  - CHANGELOG.md
++  - README.md
++  - docs/COMMAND-CODE.md
++  - package-lock.json
++  - package.json
 diff --git a/.loop-engineering/iterations/001/diff.patch b/.loop-engineering/iterations/001/diff.patch
-index 5d2b728..e69de29 100644
+index 248355f..e69de29 100644
 --- a/.loop-engineering/iterations/001/diff.patch
 +++ b/.loop-engineering/iterations/001/diff.patch
-@@ -1,116 +0,0 @@
+@@ -1,134 +0,0 @@
 -diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
--index 11483d1..b87b0ef 100644
+-index b87b0ef..db88b75 100644
 ---- a/.loop-engineering/iterations/001/context.md
 -+++ b/.loop-engineering/iterations/001/context.md
 -@@ -1,6 +1,6 @@
 - # Context
 - 
---- objective: Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering.
---- git_head: 9bb6e6a
--+- objective: Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification.
--+- git_head: be8c15a
+- - objective: Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification.
+--- git_head: be8c15a
+-+- git_head: f1eb3b5
 - - changed_files:
--   - .loop-engineering/loop.yml
+--  - .loop-engineering/loop.yml
+-+  - none
 -diff --git a/.loop-engineering/iterations/001/diff.patch b/.loop-engineering/iterations/001/diff.patch
--index 71a2b16..e69de29 100644
+-index 5d2b728..e69de29 100644
 ---- a/.loop-engineering/iterations/001/diff.patch
 -+++ b/.loop-engineering/iterations/001/diff.patch
--@@ -1,88 +0,0 @@
+-@@ -1,116 +0,0 @@
 --diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
---index e286691..11483d1 100644
+--index 11483d1..b87b0ef 100644
 ----- a/.loop-engineering/iterations/001/context.md
 --+++ b/.loop-engineering/iterations/001/context.md
 --@@ -1,6 +1,6 @@
 -- # Context
 -- 
----- objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
----- git_head: feb7fda
---+- objective: Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering.
---+- git_head: 9bb6e6a
+---- objective: Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering.
+---- git_head: 9bb6e6a
+--+- objective: Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification.
+--+- git_head: be8c15a
 -- - changed_files:
----  - none
---+  - .loop-engineering/loop.yml
+--   - .loop-engineering/loop.yml
 --diff --git a/.loop-engineering/iterations/001/diff.patch b/.loop-engineering/iterations/001/diff.patch
---index 94dd836..e69de29 100644
+--index 71a2b16..e69de29 100644
 ----- a/.loop-engineering/iterations/001/diff.patch
 --+++ b/.loop-engineering/iterations/001/diff.patch
---@@ -1,59 +0,0 @@
+--@@ -1,88 +0,0 @@
 ---diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
----index 077db78..e286691 100644
+---index e286691..11483d1 100644
 ------ a/.loop-engineering/iterations/001/context.md
 ---+++ b/.loop-engineering/iterations/001/context.md
 ---@@ -1,6 +1,6 @@
 --- # Context
 --- 
---- - objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
------ git_head: 836a8da
----+- git_head: feb7fda
+----- objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
+----- git_head: feb7fda
+---+- objective: Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering.
+---+- git_head: 9bb6e6a
 --- - changed_files:
----   - none
+----  - none
+---+  - .loop-engineering/loop.yml
 ---diff --git a/.loop-engineering/iterations/001/diff.patch b/.loop-engineering/iterations/001/diff.patch
----index 12ef27e..e69de29 100644
+---index 94dd836..e69de29 100644
 ------ a/.loop-engineering/iterations/001/diff.patch
 ---+++ b/.loop-engineering/iterations/001/diff.patch
----@@ -1,42 +0,0 @@
+---@@ -1,59 +0,0 @@
 ----diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
-----index 0d55cc8..077db78 100644
+----index 077db78..e286691 100644
 ------- a/.loop-engineering/iterations/001/context.md
 ----+++ b/.loop-engineering/iterations/001/context.md
 ----@@ -1,6 +1,6 @@
 ---- # Context
 ---- 
 ---- - objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
------- git_head: 1ecf491
-----+- git_head: 836a8da
+------ git_head: 836a8da
+----+- git_head: feb7fda
 ---- - changed_files:
------  - .loop-engineering/loop.yml
-----+  - none
+----   - none
 ----diff --git a/.loop-engineering/iterations/001/diff.patch b/.loop-engineering/iterations/001/diff.patch
-----index 3c09963..e69de29 100644
+----index 12ef27e..e69de29 100644
 ------- a/.loop-engineering/iterations/001/diff.patch
 ----+++ b/.loop-engineering/iterations/001/diff.patch
-----@@ -1,24 +0,0 @@
+----@@ -1,42 +0,0 @@
 -----diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
------index 35f2064..0d55cc8 100644
+-----index 0d55cc8..077db78 100644
 -------- a/.loop-engineering/iterations/001/context.md
 -----+++ b/.loop-engineering/iterations/001/context.md
 -----@@ -1,6 +1,6 @@
 ----- # Context
 ----- 
-------- objective: Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents.
-------- git_head: 2dc6d58
------+- objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
------+- git_head: 1ecf491
+----- - objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
+------- git_head: 1ecf491
+-----+- git_head: 836a8da
 ----- - changed_files:
-------  - none
------+  - .loop-engineering/loop.yml
------diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
------index 0774cf9..3b0bb0f 100644
--------- a/.loop-engineering/loop.yml
------+++ b/.loop-engineering/loop.yml
------@@ -1,4 +1,4 @@
-------objective: "Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents."
------+objective: "Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools."
------ checklist_file: ""
------ max_iterations: 4
------ max_no_progress: 2
+------  - .loop-engineering/loop.yml
+-----+  - none
+-----diff --git a/.loop-engineering/iterations/001/diff.patch b/.loop-engineering/iterations/001/diff.patch
+-----index 3c09963..e69de29 100644
+-------- a/.loop-engineering/iterations/001/diff.patch
+-----+++ b/.loop-engineering/iterations/001/diff.patch
+-----@@ -1,24 +0,0 @@
+------diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
+------index 35f2064..0d55cc8 100644
+--------- a/.loop-engineering/iterations/001/context.md
+------+++ b/.loop-engineering/iterations/001/context.md
+------@@ -1,6 +1,6 @@
+------ # Context
+------ 
+-------- objective: Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents.
+-------- git_head: 2dc6d58
+------+- objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
+------+- git_head: 1ecf491
+------ - changed_files:
+-------  - none
+------+  - .loop-engineering/loop.yml
+------diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
+------index 0774cf9..3b0bb0f 100644
+--------- a/.loop-engineering/loop.yml
+------+++ b/.loop-engineering/loop.yml
+------@@ -1,4 +1,4 @@
+-------objective: "Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents."
+------+objective: "Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools."
+------ checklist_file: ""
+------ max_iterations: 4
+------ max_no_progress: 2
+---diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
+---index bd881b8..f6dde6b 100644
+------ a/.loop-engineering/loop.yml
+---+++ b/.loop-engineering/loop.yml
+---@@ -1,4 +1,4 @@
+----objective: "Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools."
+---+objective: "Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering."
+--- checklist_file: ""
+--- max_iterations: 4
+--- max_no_progress: 2
 --diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
---index bd881b8..f6dde6b 100644
+--index f6dde6b..a0dd9ce 100644
 ----- a/.loop-engineering/loop.yml
 --+++ b/.loop-engineering/loop.yml
 --@@ -1,4 +1,4 @@
----objective: "Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools."
---+objective: "Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering."
+---objective: "Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering."
+--+objective: "Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification."
 -- checklist_file: ""
 -- max_iterations: 4
 -- max_no_progress: 2
--diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
--index f6dde6b..a0dd9ce 100644
----- a/.loop-engineering/loop.yml
--+++ b/.loop-engineering/loop.yml
--@@ -1,4 +1,4 @@
---objective: "Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering."
--+objective: "Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification."
-- checklist_file: ""
-- max_iterations: 4
-- max_no_progress: 2
+diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
+index c51f56f..6a6367b 100644
+--- a/.loop-engineering/loop.yml
++++ b/.loop-engineering/loop.yml
+@@ -1,4 +1,4 @@
+-objective: "Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification."
++objective: "Prepare, verify, tag, and publish Kujo CMD 0.2.0 with current Command Code integration and release documentation."
+ checklist_file: ""
+ max_iterations: 4
+ max_no_progress: 2
+@@ -9,12 +9,12 @@ allowed_actions:
+   - edit_files
+   - run_tests
+   - commit_local_changes
++  - publish_release
+ 
+ blocked_actions:
+   - deploy
+   - destructive_cleanup
+   - production_config_change
+-  - publish_release
+ 
+ eval_gates:
+   - id: unit_release_tests
+@@ -29,6 +29,12 @@ eval_gates:
+   - id: diff_check
+     command: "git diff --check -- CHANGELOG.md README.md assets catalog docs lib scripts tests"
+     required: true
++  - id: package_dry_run
++    command: "npm pack --dry-run"
++    required: true
++  - id: shipcheck_gate
++    command: "cd ../shipcheck && kujo run shipcheck.kujo gate --dir ../kujo-cmd --format json"
++    required: true
+ 
+ commit:
+   enabled: true
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index c7d05e7..0b001c2 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -2,6 +2,8 @@
+ 
+ ## Unreleased
+ 
++## 0.2.0 - 2026-10-06
++
+ - Add Lens flow validation and approval-gated real-browser page checks, plus an
+   explicit `kujo-cmd browser install|status` dependency lifecycle and doctor
+   check.
+diff --git a/README.md b/README.md
+index e02c91c..9a129b7 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ # Kujo CMD
+ 
+-[![Version](https://img.shields.io/badge/version-0.1.4-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.1.4)
++[![Version](https://img.shields.io/badge/version-0.2.0-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.2.0)
+ [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+ [![built with Kujo](https://img.shields.io/badge/built%20with-Kujo-white.svg)](https://github.com/kujolang/kujo)
+ 
+@@ -94,6 +94,7 @@ For a broader release review:
+ 
+ - [Watch the 26-second Command Code launch demo](https://github.com/kujolang/mcp/blob/main/demos/command-code-ollama-live-proof/command-code-ollama-kujo-live-polished.mp4)
+ - [Watch the 56-second Ability walkthrough](https://github.com/kujolang/mcp/blob/main/demos/command-code-ability-walkthrough/renders/command-code-ability-walkthrough_2026-09-13_19-28-55.mp4)
++- [Read the Kujo CMD integration guide](https://docs.kujolang.ai/tools/kujo-cmd/)
+ 
+ ## Approvals and receipts
+ 
+diff --git a/docs/COMMAND-CODE.md b/docs/COMMAND-CODE.md
+index 44adb2a..e5e298f 100644
+--- a/docs/COMMAND-CODE.md
++++ b/docs/COMMAND-CODE.md
+@@ -18,16 +18,20 @@ updates; normal execution is local and works offline.
+ To pin a project to this release, include the version:
+ 
+ ```bash
+-npx @kujolang/kujo-cmd@0.1.4 setup
++npx @kujolang/kujo-cmd@0.2.0 setup
+ ```
+ 
+ ## What appears in Command Code
+ 
+-The default Essentials profile exposes catalog and receipt inspection plus
+-Scout, PatchBrief, and ShipCheck. Review adds ChangeBucket, Fence, Spec, and
+-Scent. Ship adds Eval and RunLedger. Full adds Dispatch validation, local RAG
+-query, and optional Watchdog health. Every source is already local, so changing
+-profiles is instant:
++The default Essentials profile exposes five catalog, receipt, repository,
++change-summary, and release-scan tools. Review exposes 18 tools, adding
++architecture, task-contract, context, artifact-drift, durable-record, decision,
++showcase, and Lens flow checks. Ship exposes 29 tools, adding evaluation,
++RunLedger lifecycle records, privacy operations, failure capture, telemetry,
++offline decision review, showcase rendering, and real-browser Lens checks.
++Full exposes all 38 tools, including approved workflow execution, RAG ingest,
++Muzzle, Kennel, and PackWrite generation. Every one of the 25 source projects
++is already local, so changing profiles is instant:
+ 
+ ```bash
+ kujo-cmd profiles
+@@ -87,6 +91,8 @@ kujo-cmd doctor --json
+ kujo-cmd status
+ kujo-cmd repair
+ kujo-cmd update
++kujo-cmd browser status             # optional Lens Chromium runtime
++kujo-cmd browser install
+ kujo-cmd services start watchdog   # optional, loopback only
+ kujo-cmd services status watchdog
+ kujo-cmd uninstall                 # keep shared sources and receipts
+@@ -100,6 +106,18 @@ structured error and receipt rather than retrying a mutating call blindly.
+ only during an explicit setup/update; project files cannot redirect execution
+ to another binary or source tree.
+ 
++Setup also projects seven scoped Command Code agents and a trust-gated mod
++under `.commandcode/`. The agents use explicit Kujo MCP allowlists. The mod can
++send metadata-only correlation to loopback Watchdog, spool a bounded queue when
++Watchdog is unavailable, and apply a one-shot Jidoka continuation after a Kujo
++tool failure. Automatic RunLedger start/finish records remain opt-in through
++`KUJO_CMD_RUNLEDGER=1`.
++
++Lens flow validation works without a browser. Real-page checks require the
++explicit `kujo-cmd browser install` step, which installs Lens's lockfile-pinned
++dependencies and Chromium build. `kujo-cmd doctor` verifies that optional
++runtime whenever the Ship or Full profile exposes browser checks.
++
+ ## Example workflow
+ 
+ Ask Command Code:
+diff --git a/package-lock.json b/package-lock.json
+index 12a191d..c632b57 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "@kujolang/kujo-cmd",
+-  "version": "0.1.4",
++  "version": "0.2.0",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "@kujolang/kujo-cmd",
+-      "version": "0.1.4",
++      "version": "0.2.0",
+       "license": "MIT",
+       "dependencies": {
+         "@kujolang/kujo-runtime": "1.8.0"
+diff --git a/package.json b/package.json
+index 20fea75..0485db5 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "@kujolang/kujo-cmd",
+-  "version": "0.1.4",
++  "version": "0.2.0",
+   "description": "Local-first Kujo Ability and Agent Skills integration for Command Code.",
+   "type": "module",
+   "bin": {

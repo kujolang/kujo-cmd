@@ -1,6 +1,6 @@
 # Kujo CMD
 
-[![Version](https://img.shields.io/badge/version-0.1.4-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.1.4)
+[![Version](https://img.shields.io/badge/version-0.2.0-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.2.0)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![built with Kujo](https://img.shields.io/badge/built%20with-Kujo-white.svg)](https://github.com/kujolang/kujo)
 
@@ -94,6 +94,7 @@ For a broader release review:
 
 - [Watch the 26-second Command Code launch demo](https://github.com/kujolang/mcp/blob/main/demos/command-code-ollama-live-proof/command-code-ollama-kujo-live-polished.mp4)
 - [Watch the 56-second Ability walkthrough](https://github.com/kujolang/mcp/blob/main/demos/command-code-ability-walkthrough/renders/command-code-ability-walkthrough_2026-09-13_19-28-55.mp4)
+- [Read the Kujo CMD integration guide](https://docs.kujolang.ai/tools/kujo-cmd/)
 
 ## Approvals and receipts
 

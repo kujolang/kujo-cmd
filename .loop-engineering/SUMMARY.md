@@ -10,13 +10,13 @@ success
 
 ## Verification
 
-- passed: unit_release_tests, package_e2e, command_code_host, diff_check
+- passed: unit_release_tests, package_e2e, command_code_host, diff_check, package_dry_run, shipcheck_gate
 - blocked: none
 - failed: none
 
 ## Commits
 
-- Loop engineering: Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification.
+- Loop engineering: Prepare, verify, tag, and publish Kujo CMD 0.2.0 with current Command Code integration and release documentation.
 
 ## Remaining
 

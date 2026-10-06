@@ -3,34 +3,34 @@
 $ npm test
 npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
 
-> @kujolang/kujo-cmd@0.1.4 pretest
+> @kujolang/kujo-cmd@0.2.0 pretest
 > npm run build
 
 npm warn Unknown env config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
 npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
 
-> @kujolang/kujo-cmd@0.1.4 build
+> @kujolang/kujo-cmd@0.2.0 build
 > node scripts/build-release.mjs
 
 
-> @kujolang/kujo-cmd@0.1.4 test
+> @kujolang/kujo-cmd@0.2.0 test
 > node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
 
-✔ portable profiles expose a growing catalog without changing installation (14.506512ms)
-✔ ability overrides affect exposure, not the installed source catalog (5.392602ms)
-✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (93.68302ms)
-✔ Lens browser status requires both the bridge dependency and browser executable (466.558498ms)
-✔ Lens browser installer uses the locked bridge lifecycle and verifies Chromium (413.272519ms)
-✔ tests/release.test.mjs (1111.126863ms)
-✔ approval, idempotency, receipts, restart, and cancellation fail closed (67.806956ms)
-✔ concurrent keyed approvals execute once across runtime instances (124.340394ms)
-✔ bounded output and sharded idempotency state prevent unbounded hot files (822.144022ms)
-✔ workspace path resolution rejects intermediate symbolic-link escapes (13.410337ms)
-✔ skill cleanup rejects a forged traversal manifest before deletion (14.023357ms)
-✔ Command Code asset cleanup rejects an unowned manifest entry (4.689389ms)
-✔ project configuration cannot override trusted executable or source locations (88.337108ms)
-✔ purge guard rejects roots that contain the user home or working directory (0.909409ms)
-✔ setup, profiles, repair, and uninstall preserve unrelated host config (1631.495056ms)
+✔ portable profiles expose a growing catalog without changing installation (15.494588ms)
+✔ ability overrides affect exposure, not the installed source catalog (3.33652ms)
+✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (104.473075ms)
+✔ Lens browser status requires both the bridge dependency and browser executable (654.798283ms)
+✔ Lens browser installer uses the locked bridge lifecycle and verifies Chromium (588.329759ms)
+✔ tests/release.test.mjs (1482.862417ms)
+✔ approval, idempotency, receipts, restart, and cancellation fail closed (70.046632ms)
+✔ concurrent keyed approvals execute once across runtime instances (149.491618ms)
+✔ bounded output and sharded idempotency state prevent unbounded hot files (1410.579136ms)
+✔ workspace path resolution rejects intermediate symbolic-link escapes (12.205922ms)
+✔ skill cleanup rejects a forged traversal manifest before deletion (11.268652ms)
+✔ Command Code asset cleanup rejects an unowned manifest entry (7.332309ms)
+✔ project configuration cannot override trusted executable or source locations (147.901222ms)
+✔ purge guard rejects roots that contain the user home or working directory (3.885056ms)
+✔ setup, profiles, repair, and uninstall preserve unrelated host config (2291.828291ms)
 ℹ tests 15
 ℹ suites 0
 ℹ pass 15
@@ -38,14 +38,14 @@ npm warn Unknown user config "python". This will stop working in the next major 
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1842.710608
+ℹ duration_ms 2629.448787
 gate unit_release_tests: pass
 
 ## gate: package_e2e
 $ npm run test:e2e
 npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
 
-> @kujolang/kujo-cmd@0.1.4 test:e2e
+> @kujolang/kujo-cmd@0.2.0 test:e2e
 > node tests/e2e.test.mjs
 
 Command Code local package compatibility: setup, discovery, schema metadata, canonical invocation, approvals, receipts, concurrency, and restart passed
@@ -55,7 +55,7 @@ gate package_e2e: pass
 $ COMMAND_CODE_EXPECTED_VERSION=1.75.1 npm run test:command-code
 npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
 
-> @kujolang/kujo-cmd@0.1.4 test:command-code
+> @kujolang/kujo-cmd@0.2.0 test:command-code
 > node scripts/check-command-code-host.mjs
 
 {
@@ -73,3 +73,194 @@ gate command_code_host: pass
 ## gate: diff_check
 $ git diff --check -- CHANGELOG.md README.md assets catalog docs lib scripts tests
 gate diff_check: pass
+
+## gate: package_dry_run
+$ npm pack --dry-run
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.2.0 prepack
+> npm run build
+
+npm warn Unknown env config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.2.0 build
+> node scripts/build-release.mjs
+
+npm notice
+npm notice 📦  @kujolang/kujo-cmd@0.2.0
+npm notice Tarball Contents
+npm notice 445B .generated/BUILD.json
+npm notice 24.3kB .generated/local-runtime.mjs
+npm notice 3.6kB CHANGELOG.md
+npm notice 1.1kB LICENSE
+npm notice 8.8kB README.md
+npm notice 2.3kB SECURITY.md
+npm notice 778B assets/command-code/agents/kujo-browser-reviewer.md
+npm notice 750B assets/command-code/agents/kujo-context-builder.md
+npm notice 875B assets/command-code/agents/kujo-decision-reviewer.md
+npm notice 1.0kB assets/command-code/agents/kujo-release-verifier.md
+npm notice 942B assets/command-code/agents/kujo-reviewer.md
+npm notice 1.1kB assets/command-code/agents/kujo-safety-evidence.md
+npm notice 1.1kB assets/command-code/agents/kujo-workflow-operator.md
+npm notice 8.8kB assets/command-code/mods/kujo-command-bridge.ts
+npm notice 5.0kB bin/kujo-cmd-mcp.mjs
+npm notice 20.8kB bin/kujo-cmd.mjs
+npm notice 35.0kB catalog/abilities.json
+npm notice 2.6kB catalog/profiles.json
+npm notice 2.6kB catalog/sources.json
+npm notice 3.2kB lib/app.mjs
+npm notice 2.1kB lib/catalog.mjs
+npm notice 22.4kB lib/executor.mjs
+npm notice 9.3kB lib/install.mjs
+npm notice 3.1kB lib/installation.mjs
+npm notice 1.9kB lib/io.mjs
+npm notice 1.6kB lib/lens.mjs
+npm notice 4.7kB lib/paths.mjs
+npm notice 1.4kB lib/process.mjs
+npm notice 179B lib/version.mjs
+npm notice 1.3kB package.json
+npm notice 6.0kB scripts/check-command-code-host.mjs
+npm notice Tarball Details
+npm notice name: @kujolang/kujo-cmd
+npm notice version: 0.2.0
+npm notice filename: kujolang-kujo-cmd-0.2.0.tgz
+npm notice package size: 44.0 kB
+npm notice unpacked size: 178.9 kB
+npm notice shasum: 12ab223be468bb2ceb02f8407604cece052956f7
+npm notice integrity: sha512-SR0QJvMp+Cp+p[...]LtUneu2JB7bLQ==
+npm notice total files: 31
+npm notice
+kujolang-kujo-cmd-0.2.0.tgz
+gate package_dry_run: pass
+
+## gate: shipcheck_gate
+$ cd ../shipcheck && kujo run shipcheck.kujo gate --dir ../kujo-cmd --format json
+{
+  "checks": [
+    {
+      "detail": "",
+      "message": "Git repository detected",
+      "name": "git-repo",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "",
+      "message": "README found: README.md",
+      "name": "readme",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "",
+      "message": "LICENSE found: LICENSE",
+      "name": "license",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "",
+      "message": "Ignore files found: .gitignore",
+      "name": "ignore-files",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "",
+      "message": "Test directory found: tests/",
+      "name": "tests-exist",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "Add a lint script or Makefile target",
+      "message": "No lint command detected",
+      "name": "lint-command",
+      "passed": 0,
+      "severity": "warning"
+    },
+    {
+      "detail": "Add a format script or Makefile target",
+      "message": "No format command detected",
+      "name": "format-command",
+      "passed": 0,
+      "severity": "warning"
+    },
+    {
+      "detail": "",
+      "message": "CI configuration found: .github/workflows/",
+      "name": "ci-config",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "",
+      "message": "README has install/quickstart instructions",
+      "name": "readme-install",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "Add a 'Usage' section with examples",
+      "message": "README may lack usage instructions",
+      "name": "readme-usage",
+      "passed": 0,
+      "severity": "warning"
+    },
+    {
+      "detail": "Add examples to help users get started",
+      "message": "No examples/ or demo/ directory found",
+      "name": "examples",
+      "passed": 0,
+      "severity": "warning"
+    },
+    {
+      "detail": "",
+      "message": "Documentation directory found with 10 entries",
+      "name": "docs",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "",
+      "message": "package.json found with version field",
+      "name": "version-metadata",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "",
+      "message": "Changelog found: CHANGELOG.md",
+      "name": "changelog",
+      "passed": 1,
+      "severity": "info"
+    },
+    {
+      "detail": "Add kennel.toml for Kujo package metadata (if this is a Kujo project)",
+      "message": "No kennel.toml found",
+      "name": "kennel-manifest",
+      "passed": 0,
+      "severity": "warning"
+    },
+    {
+      "detail": "Define 'entry' in kennel.toml [kujo] section or add a main .kujo script",
+      "message": "No clear entry point detected",
+      "name": "entry-point",
+      "passed": 0,
+      "severity": "warning"
+    }
+  ],
+  "dir": "../kujo-cmd",
+  "project_type": "node",
+  "summary": {
+    "failed_errors": 0,
+    "gate_passed": 1,
+    "passed": 10,
+    "total_checks": 16,
+    "warnings": 6
+  },
+  "tool": "shipcheck",
+  "version": "1.0.0"
+}
+gate shipcheck_gate: pass

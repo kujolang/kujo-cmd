@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0 - 2026-10-06
+
 - Add Lens flow validation and approval-gated real-browser page checks, plus an
   explicit `kujo-cmd browser install|status` dependency lifecycle and doctor
   check.

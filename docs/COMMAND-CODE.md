@@ -18,16 +18,20 @@ updates; normal execution is local and works offline.
 To pin a project to this release, include the version:
 
 ```bash
-npx @kujolang/kujo-cmd@0.1.4 setup
+npx @kujolang/kujo-cmd@0.2.0 setup
 ```
 
 ## What appears in Command Code
 
-The default Essentials profile exposes catalog and receipt inspection plus
-Scout, PatchBrief, and ShipCheck. Review adds ChangeBucket, Fence, Spec, and
-Scent. Ship adds Eval and RunLedger. Full adds Dispatch validation, local RAG
-query, and optional Watchdog health. Every source is already local, so changing
-profiles is instant:
+The default Essentials profile exposes five catalog, receipt, repository,
+change-summary, and release-scan tools. Review exposes 18 tools, adding
+architecture, task-contract, context, artifact-drift, durable-record, decision,
+showcase, and Lens flow checks. Ship exposes 29 tools, adding evaluation,
+RunLedger lifecycle records, privacy operations, failure capture, telemetry,
+offline decision review, showcase rendering, and real-browser Lens checks.
+Full exposes all 38 tools, including approved workflow execution, RAG ingest,
+Muzzle, Kennel, and PackWrite generation. Every one of the 25 source projects
+is already local, so changing profiles is instant:
 
 ```bash
 kujo-cmd profiles
@@ -87,6 +91,8 @@ kujo-cmd doctor --json
 kujo-cmd status
 kujo-cmd repair
 kujo-cmd update
+kujo-cmd browser status             # optional Lens Chromium runtime
+kujo-cmd browser install
 kujo-cmd services start watchdog   # optional, loopback only
 kujo-cmd services status watchdog
 kujo-cmd uninstall                 # keep shared sources and receipts
@@ -99,6 +105,18 @@ structured error and receipt rather than retrying a mutating call blindly.
 `KUJO_CMD_HOME` relocates shared state. `KUJO_BIN` selects a compatible runtime
 only during an explicit setup/update; project files cannot redirect execution
 to another binary or source tree.
+
+Setup also projects seven scoped Command Code agents and a trust-gated mod
+under `.commandcode/`. The agents use explicit Kujo MCP allowlists. The mod can
+send metadata-only correlation to loopback Watchdog, spool a bounded queue when
+Watchdog is unavailable, and apply a one-shot Jidoka continuation after a Kujo
+tool failure. Automatic RunLedger start/finish records remain opt-in through
+`KUJO_CMD_RUNLEDGER=1`.
+
+Lens flow validation works without a browser. Real-page checks require the
+explicit `kujo-cmd browser install` step, which installs Lens's lockfile-pinned
+dependencies and Chromium build. `kujo-cmd doctor` verifies that optional
+runtime whenever the Ship or Full profile exposes browser checks.
 
 ## Example workflow
 

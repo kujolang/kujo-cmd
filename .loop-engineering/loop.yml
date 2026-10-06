@@ -1,4 +1,4 @@
-objective: "Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification."
+objective: "Prepare, verify, tag, and publish Kujo CMD 0.2.0 with current Command Code integration and release documentation."
 checklist_file: ""
 max_iterations: 4
 max_no_progress: 2
@@ -9,12 +9,12 @@ allowed_actions:
   - edit_files
   - run_tests
   - commit_local_changes
+  - publish_release
 
 blocked_actions:
   - deploy
   - destructive_cleanup
   - production_config_change
-  - publish_release
 
 eval_gates:
   - id: unit_release_tests
@@ -28,6 +28,12 @@ eval_gates:
     required: true
   - id: diff_check
     command: "git diff --check -- CHANGELOG.md README.md assets catalog docs lib scripts tests"
+    required: true
+  - id: package_dry_run
+    command: "npm pack --dry-run"
+    required: true
+  - id: shipcheck_gate
+    command: "cd ../shipcheck && kujo run shipcheck.kujo gate --dir ../kujo-cmd --format json"
     required: true
 
 commit:
