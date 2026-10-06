@@ -46,6 +46,9 @@ adapter or another npm package.
 | Redact | Scan or sanitize documents under an explicit privacy policy |
 | VersionSeal | Validate durable version records without minting authority |
 | PackWrite | Validate, summarize, or generate portable agent execution packs |
+| Tribunal | Validate proposals or run deterministic offline decision hearings |
+| Dossier | Validate and report local claim and evidence ledgers |
+| Howl | Validate or render deterministic showcase artifacts and galleries |
 
 Each call keeps its Ability identity, declared effects, policy decision,
 invocation ID, receipt ID, and any supplied session, run, agent, or model IDs.
@@ -59,9 +62,9 @@ Command Code sees. The default **Essentials** profile exposes five tools.
 | Profile | Tools | Adds |
 |---|---:|---|
 | Essentials | 5 | Catalog, receipts, Scout, PatchBrief, ShipCheck |
-| Review | 13 | ChangeBucket, Fence, Spec, Scent, Concord, VersionSeal, PackWrite checks |
-| Ship | 21 | Eval, RunLedger lifecycle, Redact, CaseFile, Watchdog telemetry |
-| Full | 30 | Dispatch execution, PackWrite generation, RAG ingest, Muzzle, Kennel, and all installed tools |
+| Review | 17 | ChangeBucket, Fence, Spec, Scent, Concord, VersionSeal, PackWrite, Tribunal, Dossier, Howl checks |
+| Ship | 27 | Eval, RunLedger lifecycle, Redact, offline Tribunal review, Howl rendering, CaseFile, Watchdog telemetry |
+| Full | 36 | Dispatch execution, PackWrite generation, RAG ingest, Muzzle, Kennel, and all installed tools |
 
 ```bash
 kujo-cmd profiles
@@ -119,7 +122,7 @@ kujo-cmd uninstall --purge         # remove shared Kujo CMD data
 ```
 
 Setup writes `.mcp.json`, `.kujo/cmd.json`, and the relevant links under
-`.agents/skills`. It also projects a trust-gated Command Code mod and five
+`.agents/skills`. It also projects a trust-gated Command Code mod and six
 scoped agents under `.commandcode/`. Their MCP allowlists are explicit and do
 not replace Command Code permission checks or Kujo's request-bound approvals.
 Shared sources and receipts default to

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add offline Tribunal proposal validation and decision review, read-only
+  Dossier validation/reporting, and Howl showcase validation/rendering.
+- Add a scoped decision-review agent and extend repository and release agents
+  with explicit Dossier, Tribunal, and Howl tool allowlists.
 - Add Redact scanning and sanitization, VersionSeal validation, PackWrite pack
   workflows, and explicit RunLedger start/finish Abilities.
 - Add a scoped Command Code safety/evidence agent and extend workflow and

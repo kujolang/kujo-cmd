@@ -24,6 +24,7 @@ for (const required of [
   "assets/command-code/mods/kujo-command-bridge.ts",
   "assets/command-code/agents/kujo-reviewer.md",
   "assets/command-code/agents/kujo-safety-evidence.md",
+  "assets/command-code/agents/kujo-decision-reviewer.md",
   "lib/version.mjs",
   "scripts/check-command-code-host.mjs",
   "README.md",

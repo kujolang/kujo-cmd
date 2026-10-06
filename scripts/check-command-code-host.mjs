@@ -59,7 +59,7 @@ try {
   await lifecycle.afterToolCall({ toolCallId: "call-1", toolName: "mcp__kujo__kujo_shipcheck_scan", isError: true });
   assert.equal((await lifecycle.onStop()).continue, true);
   assert.equal(await lifecycle.onStop(), undefined);
-  for (const name of ["kujo-context-builder.md", "kujo-reviewer.md", "kujo-workflow-operator.md", "kujo-release-verifier.md", "kujo-safety-evidence.md"]) {
+  for (const name of ["kujo-context-builder.md", "kujo-reviewer.md", "kujo-workflow-operator.md", "kujo-release-verifier.md", "kujo-safety-evidence.md", "kujo-decision-reviewer.md"]) {
     const agent = await readFile(join(project, ".commandcode", "agents", name), "utf8");
     assert.match(agent, /mcp__kujo__kujo_/); assert.doesNotMatch(agent, /tools:\s*["']?\*/);
   }
@@ -86,7 +86,7 @@ try {
     live = { model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
   }
 
-  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "loaded", agents: 5, live }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "loaded", agents: 6, live }, null, 2)}\n`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }
