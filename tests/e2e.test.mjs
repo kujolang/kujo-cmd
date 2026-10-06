@@ -34,11 +34,13 @@ await writeFile(join(project, "README.md"), "# Fixture\n"); await writeFile(join
 await exec("git", ["init", "-q"], { cwd: project }); await exec("git", ["add", "."], { cwd: project }); await exec("git", ["-c", "user.name=Kujo", "-c", "user.email=kujo@example.invalid", "commit", "-qm", "fixture"], { cwd: project }); await writeFile(join(project, "README.md"), "# Fixture\n\nChanged.\n");
 await exec(process.execPath, [join(packageRoot, "scripts", "build-release.mjs")]);
 const env = { KUJO_CMD_HOME: home, KUJO_CMD_PROJECT: project, KUJO_BIN: kujo };
-const localCatalogAvailable = ["ability", "scout", "scent", "patchbrief", "changebucket", "shipcheck", "dispatch", "runledger", "watchdog", "rag", "fence", "spec", "eval", "kujo-skills", "casefile", "concord", "muzzle", "kennel", "redact", "versionseal", "packwrite"]
+const localCatalogAvailable = ["ability", "scout", "scent", "patchbrief", "changebucket", "shipcheck", "dispatch", "runledger", "watchdog", "rag", "fence", "spec", "eval", "kujo-skills", "casefile", "concord", "muzzle", "kennel", "redact", "versionseal", "packwrite", "tribunal", "dossier", "howl"]
   .every((source) => existsSync(join(sourceRoot, source)));
 const setupArgs = [cli, "setup", "--project", project, ...(localCatalogAvailable ? ["--source-root", sourceRoot] : []), "--json"];
 const setup = JSON.parse((await exec(process.execPath, setupArgs, { env: { ...process.env, ...env }, timeout: 180_000 })).stdout);
 assert.equal(setup.ok, true); assert.equal(setup.hosted_service_required, false); assert.equal(setup.abilities, 5);
+const installation = JSON.parse(await readFile(join(home, "installation.json"), "utf8"));
+await exec(kujo, ["run", join(installation.sources.dossier.path, "dossier.kujo"), "--interpreter", "--", "init", "--state", join(project, ".dossier-e2e"), "--json"], { cwd: project });
 
 let rpc = rpcProcess(env);
 let message = await rpc.request("initialize", { protocolVersion: "1900-01-01" }); assert.equal(message.error.code, -32602);
@@ -61,13 +63,20 @@ const receiptId = message.result.structuredContent.receipt.receipt_id;
 rpc.close();
 
 await writeFile(join(project, "bad.spec.yml"), "name: missing-goal\n");
-const selected = JSON.parse((await exec(process.execPath, [cli, "profile", "kujo.profile.review", "--project", project, "--json"], { env: { ...process.env, ...env } })).stdout); assert.equal(selected.abilities, 13);
+await writeFile(join(project, "decision.md"), "# Adopt bounded evidence receipts\n\n## Scope\n\nAdd deterministic local receipts to agent workflows.\n\n## Non-goals\n\n- Hosted services\n- Automatic approval\n\n## Proposal\n\nStart with one repository and require explicit validation evidence.\n\n## Decision requested\n\nShould the bounded receipt contract proceed?\n");
+await writeFile(join(project, "showcase.kujo"), "print(\"hello\")\n");
+await writeFile(join(project, "howl.json"), JSON.stringify({ project: { name: "Fixture", tagline: "Evidence", url: "" }, theme: { name: "minimal", mode: "light" }, cards: [{ id: "fixture", title: "Fixture", tagline: "A bounded example", file: "showcase.kujo", language: "kujo", concepts: ["evidence"], expected_output: "hello", caption: "A deterministic fixture.", cta: "Review it." }] }));
+const selected = JSON.parse((await exec(process.execPath, [cli, "profile", "kujo.profile.review", "--project", project, "--json"], { env: { ...process.env, ...env } })).stdout); assert.equal(selected.abilities, 17);
 rpc = rpcProcess(env); await rpc.request("initialize", { protocolVersion: "2025-11-25" });
-message = await rpc.request("tools/list"); assert.equal(message.result.tools.length, 13); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_concord_scan")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_versionseal_validate")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_packwrite_summary"));
+message = await rpc.request("tools/list"); assert.equal(message.result.tools.length, 17); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_concord_scan")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_versionseal_validate")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_packwrite_summary")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_tribunal_validate")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_dossier_report"));
 message = await rpc.request("tools/call", { name: "kujo_scout_inspect", arguments: { ...scoutInput, _kujo: { invocationId: "scout-2", idempotencyKey: "scout-key" } } });
 assert.equal(message.result.structuredContent.replayed, true); assert.equal(message.result.structuredContent.receipt.receipt_id, receiptId);
 message = await rpc.request("tools/call", { name: "kujo_changebucket_measure", arguments: { path: ".", base: "HEAD" } }); assert.equal(message.result.structuredContent.ok, true);
 message = await rpc.request("tools/call", { name: "kujo_concord_scan", arguments: { path: "." } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
+message = await rpc.request("tools/call", { name: "kujo_tribunal_validate", arguments: { path: ".", file: "decision.md" } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
+message = await rpc.request("tools/call", { name: "kujo_dossier_validate", arguments: { path: ".", state_dir: ".dossier-e2e" } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
+message = await rpc.request("tools/call", { name: "kujo_dossier_report", arguments: { path: ".", state_dir: ".dossier-e2e", limit: 10 } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
+message = await rpc.request("tools/call", { name: "kujo_howl_validate", arguments: { path: ".", manifest: "howl.json" } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
 message = await rpc.request("tools/call", { name: "kujo_spec_validate", arguments: { path: ".", file: "bad.spec.yml", strict: true } }); assert.equal(message.result.structuredContent.ok, false); assert.equal(message.result.structuredContent.receipt.error.code, "kujo_command_failed");
 message = await rpc.request("tools/call", { name: "kujo_ability_receipts", arguments: { limit: 50 } });
 assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
@@ -76,9 +85,9 @@ rpc.close();
 
 await writeFile(join(project, "redact-input.md"), "This fixture contains no sensitive data.\n");
 await writeFile(join(project, "redact-policy.yaml"), "schemaVersion: redact-policy/v1\nname: command-code-e2e\nperson_names: role-preserve\ncompany_names: placeholder\ncustomer_names: placeholder\nproduct_names: placeholder\nemails: placeholder\nphone_numbers: remove\npayment_details: remove\napi_keys: remove\ndomains: placeholder\nexact_dates: date-generalize\nmoney_amounts: range\nlaunch_strategy: generalize\npreserve_task_structure: true\nwrite_entity_map: false\nai_assist: false\n");
-const selectedShip = JSON.parse((await exec(process.execPath, [cli, "profile", "kujo.profile.ship", "--project", project, "--json"], { env: { ...process.env, ...env } })).stdout); assert.equal(selectedShip.abilities, 21);
+const selectedShip = JSON.parse((await exec(process.execPath, [cli, "profile", "kujo.profile.ship", "--project", project, "--json"], { env: { ...process.env, ...env } })).stdout); assert.equal(selectedShip.abilities, 27);
 rpc = rpcProcess(env); await rpc.request("initialize", { protocolVersion: "2025-11-25" });
-message = await rpc.request("tools/list"); assert.equal(message.result.tools.length, 21); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_redact_scan")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_runledger_finish"));
+message = await rpc.request("tools/list"); assert.equal(message.result.tools.length, 27); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_redact_scan")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_runledger_finish")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_tribunal_review")); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_howl_render"));
 const redactInput = { path: ".", file: "redact-input.md", policy: "redact-policy.yaml", audit_dir: ".redact-e2e" };
 message = await rpc.request("tools/call", { name: "kujo_redact_scan", arguments: { ...redactInput, _kujo: { invocationId: "redact-1", idempotencyKey: "redact-key" } } }); assert.equal(message.result.structuredContent.code, "ability_approval_required");
 const redactApproval = JSON.parse((await exec(process.execPath, [cli, "approve", "--project", project, "--ability", "kujo.redact.document.scan", "--invocation", "redact-1", "--input", JSON.stringify(redactInput), "--json"], { env: { ...process.env, ...env } })).stdout);
@@ -93,10 +102,17 @@ const finishInput = { path: ".", run_id: runId, status: "pass", verdict: "Integr
 message = await rpc.request("tools/call", { name: "kujo_runledger_finish", arguments: { ...finishInput, _kujo: { invocationId: "ledger-finish-1", idempotencyKey: "ledger-finish-key" } } }); assert.equal(message.result.structuredContent.code, "ability_approval_required");
 const finishApproval = JSON.parse((await exec(process.execPath, [cli, "approve", "--project", project, "--ability", "kujo.runledger.runs.finish", "--invocation", "ledger-finish-1", "--input", JSON.stringify(finishInput), "--json"], { env: { ...process.env, ...env } })).stdout);
 message = await rpc.request("tools/call", { name: "kujo_runledger_finish", arguments: { ...finishInput, _kujo: { invocationId: "ledger-finish-1", idempotencyKey: "ledger-finish-key", approvalId: finishApproval.approval_id } } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
+const tribunalInput = { path: ".", file: "decision.md", panel: "executioner-only", storage_dir: ".tribunal-e2e" };
+message = await rpc.request("tools/call", { name: "kujo_tribunal_review", arguments: { ...tribunalInput, _kujo: { invocationId: "tribunal-1", idempotencyKey: "tribunal-key" } } }); assert.equal(message.result.structuredContent.code, "ability_approval_required");
+const tribunalApproval = JSON.parse((await exec(process.execPath, [cli, "approve", "--project", project, "--ability", "kujo.tribunal.review.mock", "--invocation", "tribunal-1", "--input", JSON.stringify(tribunalInput), "--json"], { env: { ...process.env, ...env } })).stdout);
+message = await rpc.request("tools/call", { name: "kujo_tribunal_review", arguments: { ...tribunalInput, _kujo: { invocationId: "tribunal-1", idempotencyKey: "tribunal-key", approvalId: tribunalApproval.approval_id } } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
+const howlInput = { path: ".", manifest: "howl.json", output_dir: "dist/howl-e2e", format: "html" };
+message = await rpc.request("tools/call", { name: "kujo_howl_render", arguments: { ...howlInput, _kujo: { invocationId: "howl-1", idempotencyKey: "howl-key" } } }); assert.equal(message.result.structuredContent.code, "ability_approval_required");
+const howlApproval = JSON.parse((await exec(process.execPath, [cli, "approve", "--project", project, "--ability", "kujo.howl.showcase.render", "--invocation", "howl-1", "--input", JSON.stringify(howlInput), "--json"], { env: { ...process.env, ...env } })).stdout);
+message = await rpc.request("tools/call", { name: "kujo_howl_render", arguments: { ...howlInput, _kujo: { invocationId: "howl-1", idempotencyKey: "howl-key", approvalId: howlApproval.approval_id } } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
 rpc.close();
 
 const config = JSON.parse(await readFile(join(project, ".kujo", "cmd.json"), "utf8"));
-const installation = JSON.parse(await readFile(join(home, "installation.json"), "utf8"));
 assert.equal(config.sources, undefined);
-assert.equal(Object.keys(installation.sources).length, 21);
+assert.equal(Object.keys(installation.sources).length, 24);
 console.log("Command Code local package compatibility: setup, discovery, schema metadata, canonical invocation, approvals, receipts, concurrency, and restart passed");

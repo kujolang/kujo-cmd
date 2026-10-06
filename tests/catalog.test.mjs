@@ -5,12 +5,12 @@ import { validateDefinition } from "../.generated/local-runtime.mjs";
 
 test("portable profiles expose a growing catalog without changing installation", async () => {
   const catalog = await loadCatalog();
-  assert.equal(catalog.sources.length, 21);
+  assert.equal(catalog.sources.length, 24);
   const essentials = profileAbilities(catalog, "kujo.profile.essentials");
   const review = profileAbilities(catalog, "kujo.profile.review");
   const ship = profileAbilities(catalog, "kujo.profile.ship");
   const full = profileAbilities(catalog, "kujo.profile.full");
-  assert.deepEqual([essentials.length, review.length, ship.length, full.length], [5, 13, 21, 30]);
+  assert.deepEqual([essentials.length, review.length, ship.length, full.length], [5, 17, 27, 36]);
   assert.equal(new Set(catalog.abilities.map((item) => item.definition.id)).size, catalog.abilities.length);
   for (const item of catalog.abilities) {
     assert.equal(validateDefinition(item.definition), item.definition);
@@ -25,5 +25,5 @@ test("ability overrides affect exposure, not the installed source catalog", asyn
   const active = profileAbilities(catalog, "kujo.profile.essentials", ["kujo.rag.knowledge.query"], ["kujo.patchbrief.changes.summarize"]);
   assert.ok(active.some((item) => item.definition.id === "kujo.rag.knowledge.query"));
   assert.ok(!active.some((item) => item.definition.id === "kujo.patchbrief.changes.summarize"));
-  assert.equal(catalog.sources.length, 21);
+  assert.equal(catalog.sources.length, 24);
 });

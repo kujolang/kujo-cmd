@@ -16,7 +16,7 @@
     "description": "Architecture, task-contract, context, and change-footprint review tools.",
     "default": false,
     "extends": ["kujo.profile.essentials"],
-    "ability_ids": ["kujo.changebucket.changes.measure", "kujo.fence.architecture.check", "kujo.spec.contract.validate", "kujo.scent.context.pack", "kujo.concord.artifacts.scan", "kujo.versionseal.records.validate", "kujo.packwrite.pack.validate", "kujo.packwrite.pack.summary"],
+    "ability_ids": ["kujo.changebucket.changes.measure", "kujo.fence.architecture.check", "kujo.spec.contract.validate", "kujo.scent.context.pack", "kujo.concord.artifacts.scan", "kujo.versionseal.records.validate", "kujo.packwrite.pack.validate", "kujo.packwrite.pack.summary", "kujo.tribunal.proposal.validate", "kujo.dossier.records.validate", "kujo.dossier.records.report", "kujo.howl.showcase.validate"],
     "metadata": { "label": "Review", "risk": "local-write" }
   },
   {
@@ -26,7 +26,7 @@
     "description": "Verification and durable run evidence for release work.",
     "default": false,
     "extends": ["kujo.profile.review"],
-    "ability_ids": ["kujo.eval.suite.run", "kujo.runledger.runs.report", "kujo.runledger.runs.start", "kujo.runledger.runs.finish", "kujo.casefile.failure.capture", "kujo.watchdog.telemetry.record", "kujo.redact.document.scan", "kujo.redact.document.sanitize"],
+    "ability_ids": ["kujo.eval.suite.run", "kujo.runledger.runs.report", "kujo.runledger.runs.start", "kujo.runledger.runs.finish", "kujo.casefile.failure.capture", "kujo.watchdog.telemetry.record", "kujo.redact.document.scan", "kujo.redact.document.sanitize", "kujo.tribunal.review.mock", "kujo.howl.showcase.render"],
     "metadata": { "label": "Ship", "risk": "execute" }
   },
   {

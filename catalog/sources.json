@@ -21,6 +21,9 @@
     {"id":"kennel","repo":"kujolang/kennel","commit":"92326c4bc11377ffa9fedf51d8c3ad3e7575e02b"},
     {"id":"redact","repo":"kujolang/redact","commit":"a9f15ade894012ba0b004fef3ae2f12059f2278c"},
     {"id":"versionseal","repo":"kujolang/versionseal","commit":"cf14a2d23dc46b8773627ae25dbfaee6150465af"},
-    {"id":"packwrite","repo":"kujolang/packwrite","commit":"3f0cbf4b5052677d22040cdf486adf2817b40a20"}
+    {"id":"packwrite","repo":"kujolang/packwrite","commit":"3f0cbf4b5052677d22040cdf486adf2817b40a20"},
+    {"id":"tribunal","repo":"kujolang/tribunal","commit":"415b9de53d36e89bf8459b73f2e8cbc076a0a2f5"},
+    {"id":"dossier","repo":"kujolang/dossier","commit":"c3ab2e27019729eabb6c508636ebf7d82f810bf5"},
+    {"id":"howl","repo":"kujolang/howl","commit":"800c90fc12c114648e215e91bc946c50f1cd61b1"}
   ]
 }

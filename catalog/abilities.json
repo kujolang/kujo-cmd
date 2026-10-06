@@ -148,5 +148,35 @@
     "definition": {"schema":"kujo.ability/v1","id":"kujo.runledger.runs.finish","version":"1.0.0","title":"Finish RunLedger record","description":"Finalize a local RunLedger record with an explicit status and verdict.","input_schema":{"type":"object","required":["run_id","status","verdict"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"run_id":{"type":"string","minLength":1,"maxLength":160,"pattern":"^[A-Za-z0-9][A-Za-z0-9._-]*$"},"status":{"type":"string","enum":["pass","partial","fail","abandoned"]},"verdict":{"type":"string","minLength":1,"maxLength":2000},"notes":{"type":"string","maxLength":2000},"ledger_dir":{"type":"string","maxLength":4096,"default":".runledger"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.repository.git"},{"kind":"write","resource":"kujo.runledger.records"}],"idempotency":{"mode":"keyed"}},
     "tool": {"name":"kujo_runledger_finish","description":"Finalize an existing RunLedger record with a caller-supplied status and verdict. Requires one-time approval."},
     "adapter":"runledger_finish","source":"runledger"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.tribunal.proposal.validate","version":"1.0.0","title":"Validate decision proposal","description":"Validate a consequential decision proposal against Tribunal's bounded input contract without starting a hearing.","input_schema":{"type":"object","required":["file"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"file":{"type":"string","minLength":1,"maxLength":4096}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.tribunal.proposal"}],"idempotency":{"mode":"intrinsic"}},
+    "tool": {"name":"kujo_tribunal_validate","description":"Validate a local decision proposal with canonical Kujo Tribunal without creating a hearing."},
+    "adapter":"tribunal_validate","source":"tribunal"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.tribunal.review.mock","version":"1.0.0","title":"Run offline decision hearing","description":"Run a deterministic credential-free Tribunal hearing and retain its sealed local decision evidence.","input_schema":{"type":"object","required":["file"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"file":{"type":"string","minLength":1,"maxLength":4096},"panel":{"type":"string","enum":["executioner-only","fast-two-model","strategic-five"],"default":"fast-two-model"},"storage_dir":{"type":"string","maxLength":4096,"default":".tribunal"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.tribunal.proposal"},{"kind":"write","resource":"kujo.tribunal.evidence"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_tribunal_review","description":"Run a deterministic offline Tribunal hearing and retain decision evidence. Requires one-time approval."},
+    "adapter":"tribunal_review","source":"tribunal"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.dossier.records.validate","version":"1.0.0","title":"Validate evidence ledger","description":"Validate record contracts, checksums, and append-only events in a local Dossier state directory.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."},"state_dir":{"type":"string","maxLength":4096,"default":".dossier"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.dossier.records"}],"idempotency":{"mode":"intrinsic"}},
+    "tool": {"name":"kujo_dossier_validate","description":"Validate local canonical Dossier evidence records without modifying them."},
+    "adapter":"dossier_validate","source":"dossier"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.dossier.records.report","version":"1.0.0","title":"Report evidence ledger","description":"Read a bounded report of claims, sources, evidence, conflicts, quotations, consent, freshness, and rights records.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."},"state_dir":{"type":"string","maxLength":4096,"default":".dossier"},"limit":{"type":"integer","minimum":1,"maximum":1000,"default":100}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.dossier.records"}],"idempotency":{"mode":"intrinsic"}},
+    "tool": {"name":"kujo_dossier_report","description":"Read a bounded canonical Dossier evidence report without modifying its ledger."},
+    "adapter":"dossier_report","source":"dossier"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.howl.showcase.validate","version":"1.0.0","title":"Validate showcase manifest","description":"Validate a Howl showcase manifest and every referenced example without rendering artifacts.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."},"manifest":{"type":"string","maxLength":4096,"default":"howl.json"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.howl.showcase"}],"idempotency":{"mode":"intrinsic"}},
+    "tool": {"name":"kujo_howl_validate","description":"Validate a canonical Howl manifest and its referenced examples without writing output."},
+    "adapter":"howl_validate","source":"howl"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.howl.showcase.render","version":"1.0.0","title":"Render showcase artifacts","description":"Render deterministic SVG, Markdown, or HTML showcase artifacts and a local gallery from a Howl manifest.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."},"manifest":{"type":"string","maxLength":4096,"default":"howl.json"},"output_dir":{"type":"string","maxLength":4096,"default":"dist/howl"},"format":{"type":"string","enum":["all","svg","html","markdown"],"default":"all"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.howl.showcase"},{"kind":"write","resource":"kujo.howl.artifacts"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_howl_render","description":"Render deterministic canonical Howl showcase artifacts. Requires one-time approval."},
+    "adapter":"howl_render","source":"howl"
   }
 ]
