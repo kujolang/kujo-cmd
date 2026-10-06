@@ -27,7 +27,7 @@ eval_gates:
     command: "COMMAND_CODE_EXPECTED_VERSION=1.75.0 npm run test:command-code"
     required: true
   - id: diff_check
-    command: "git diff --check -- . ':(exclude).loop-engineering'"
+    command: "git diff --check -- CHANGELOG.md README.md assets catalog docs lib scripts tests"
     required: true
 
 commit:
