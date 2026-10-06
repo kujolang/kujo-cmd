@@ -16,19 +16,19 @@ npm warn Unknown user config "python". This will stop working in the next major 
 > @kujolang/kujo-cmd@0.1.4 test
 > node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
 
-✔ portable profiles expose a growing catalog without changing installation (13.135125ms)
-✔ ability overrides affect exposure, not the installed source catalog (4.883501ms)
-✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (73.088709ms)
-✔ tests/release.test.mjs (1024.053621ms)
-✔ approval, idempotency, receipts, restart, and cancellation fail closed (54.593349ms)
-✔ concurrent keyed approvals execute once across runtime instances (123.67979ms)
-✔ bounded output and sharded idempotency state prevent unbounded hot files (712.142112ms)
-✔ workspace path resolution rejects intermediate symbolic-link escapes (16.557149ms)
-✔ skill cleanup rejects a forged traversal manifest before deletion (12.813452ms)
-✔ Command Code asset cleanup rejects an unowned manifest entry (4.282285ms)
-✔ project configuration cannot override trusted executable or source locations (74.010688ms)
-✔ purge guard rejects roots that contain the user home or working directory (0.881415ms)
-✔ setup, profiles, repair, and uninstall preserve unrelated host config (1362.909075ms)
+✔ portable profiles expose a growing catalog without changing installation (17.057424ms)
+✔ ability overrides affect exposure, not the installed source catalog (4.779954ms)
+✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (74.382578ms)
+✔ tests/release.test.mjs (1116.556406ms)
+✔ approval, idempotency, receipts, restart, and cancellation fail closed (55.975174ms)
+✔ concurrent keyed approvals execute once across runtime instances (122.409684ms)
+✔ bounded output and sharded idempotency state prevent unbounded hot files (749.896243ms)
+✔ workspace path resolution rejects intermediate symbolic-link escapes (33.952522ms)
+✔ skill cleanup rejects a forged traversal manifest before deletion (11.21428ms)
+✔ Command Code asset cleanup rejects an unowned manifest entry (4.215195ms)
+✔ project configuration cannot override trusted executable or source locations (77.320738ms)
+✔ purge guard rejects roots that contain the user home or working directory (0.947597ms)
+✔ setup, profiles, repair, and uninstall preserve unrelated host config (1423.847341ms)
 ℹ tests 13
 ℹ suites 0
 ℹ pass 13
@@ -36,7 +36,7 @@ npm warn Unknown user config "python". This will stop working in the next major 
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1562.173088
+ℹ duration_ms 1654.842181
 gate unit_release_tests: pass
 
 ## gate: package_e2e
@@ -50,36 +50,25 @@ Command Code local package compatibility: setup, discovery, schema metadata, can
 gate package_e2e: pass
 
 ## gate: command_code_host
-$ COMMAND_CODE_EXPECTED_VERSION=1.74.3 npm run test:command-code
+$ COMMAND_CODE_EXPECTED_VERSION=1.75.0 npm run test:command-code
 npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
 
 > @kujolang/kujo-cmd@0.1.4 test:command-code
 > node scripts/check-command-code-host.mjs
 
-node:internal/modules/run_main:107
-    triggerUncaughtException(
-    ^
-
-AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-
-'1.75.0' !== '1.74.3'
-
-    at file:///Users/robertdevore/2026/Kujolang/kujo-repos/kujo-cmd/scripts/check-command-code-host.mjs:21:57 {
-  generatedMessage: true,
-  code: 'ERR_ASSERTION',
-  actual: '1.75.0',
-  expected: '1.74.3',
-  operator: 'strictEqual',
-  diff: 'simple'
+{
+  "ok": true,
+  "command_code": "1.75.0",
+  "abilities": 5,
+  "skills": 3,
+  "mcp": "enabled",
+  "mod": "loaded",
+  "agents": 5,
+  "live": null
 }
-
-Node.js v26.7.0
+gate command_code_host: pass
 
 ## gate: diff_check
-$ git diff --check
-.loop-engineering/iterations/001/diff.patch:7: trailing whitespace.
-+ 
-.loop-engineering/iterations/001/eval.log:82: trailing whitespace.
-++ 
-.loop-engineering/iterations/001/gate-diff_check.log:2: trailing whitespace.
-++ 
+$ git diff --check -- . ':(exclude).loop-engineering
+bash: -c: line 0: unexpected EOF while looking for matching `''
+bash: -c: line 1: syntax error: unexpected end of file

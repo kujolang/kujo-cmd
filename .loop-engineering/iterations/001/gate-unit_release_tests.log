@@ -13,19 +13,19 @@ npm warn Unknown user config "python". This will stop working in the next major 
 > @kujolang/kujo-cmd@0.1.4 test
 > node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
 
-✔ portable profiles expose a growing catalog without changing installation (23.818992ms)
-✔ ability overrides affect exposure, not the installed source catalog (3.576678ms)
-✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (72.752627ms)
-✔ tests/release.test.mjs (1342.638385ms)
-✔ approval, idempotency, receipts, restart, and cancellation fail closed (55.218845ms)
-✔ concurrent keyed approvals execute once across runtime instances (127.763161ms)
-✔ bounded output and sharded idempotency state prevent unbounded hot files (872.171863ms)
-✔ workspace path resolution rejects intermediate symbolic-link escapes (10.209857ms)
-✔ skill cleanup rejects a forged traversal manifest before deletion (7.795108ms)
-✔ Command Code asset cleanup rejects an unowned manifest entry (3.993249ms)
-✔ project configuration cannot override trusted executable or source locations (76.167484ms)
-✔ purge guard rejects roots that contain the user home or working directory (1.202839ms)
-✔ setup, profiles, repair, and uninstall preserve unrelated host config (1483.71959ms)
+✔ portable profiles expose a growing catalog without changing installation (14.418742ms)
+✔ ability overrides affect exposure, not the installed source catalog (2.347284ms)
+✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (69.741226ms)
+✔ tests/release.test.mjs (1029.857402ms)
+✔ approval, idempotency, receipts, restart, and cancellation fail closed (48.227061ms)
+✔ concurrent keyed approvals execute once across runtime instances (131.379891ms)
+✔ bounded output and sharded idempotency state prevent unbounded hot files (731.245888ms)
+✔ workspace path resolution rejects intermediate symbolic-link escapes (9.409181ms)
+✔ skill cleanup rejects a forged traversal manifest before deletion (10.937107ms)
+✔ Command Code asset cleanup rejects an unowned manifest entry (4.139556ms)
+✔ project configuration cannot override trusted executable or source locations (66.920268ms)
+✔ purge guard rejects roots that contain the user home or working directory (1.76532ms)
+✔ setup, profiles, repair, and uninstall preserve unrelated host config (1371.87505ms)
 ℹ tests 13
 ℹ suites 0
 ℹ pass 13
@@ -33,4 +33,4 @@ npm warn Unknown user config "python". This will stop working in the next major 
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1755.514676
+ℹ duration_ms 1582.935473

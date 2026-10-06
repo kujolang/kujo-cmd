@@ -10,9 +10,9 @@ blocked
 
 ## Verification
 
-- passed: unit_release_tests, package_e2e, unit_release_tests, package_e2e, unit_release_tests, package_e2e
+- passed: unit_release_tests, package_e2e, command_code_host, unit_release_tests, package_e2e, command_code_host, unit_release_tests, package_e2e, command_code_host
 - blocked: none
-- failed: command_code_host, diff_check, command_code_host, diff_check, command_code_host, diff_check
+- failed: diff_check, diff_check, diff_check
 
 ## Commits
 
