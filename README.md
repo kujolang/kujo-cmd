@@ -157,7 +157,7 @@ npm run build
 node bin/kujo-cmd.mjs setup --source-root /path/to/kujo-repos
 npm test
 npm run test:e2e
-COMMAND_CODE_EXPECTED_VERSION=1.74.3 npm run test:command-code
+COMMAND_CODE_EXPECTED_VERSION=1.75.0 npm run test:command-code
 ```
 
 Set `KUJO_CMD_LIVE_MODEL` to include a real model-driven Command Code MCP call

@@ -6,6 +6,8 @@
   workflows, and explicit RunLedger start/finish Abilities.
 - Add a scoped Command Code safety/evidence agent and extend workflow and
   release agents with explicit allowlists for the new tools.
+- Verify the projected MCP, mod, skills, and scoped agents against Command Code
+  1.75.0.
 - Repin the supported Kujo source set and add CaseFile, Concord, Muzzle, and
   Kennel to the coordinated local installation.
 - Add approval-gated CaseFile capture, Muzzle execution, Kennel install,
