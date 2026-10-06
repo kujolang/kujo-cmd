@@ -3,13 +3,22 @@ npm warn Unknown user config "python". This will stop working in the next major 
 > @kujolang/kujo-cmd@0.1.4 test:command-code
 > node scripts/check-command-code-host.mjs
 
-{
-  "ok": true,
-  "command_code": "1.75.0",
-  "abilities": 5,
-  "skills": 3,
-  "mcp": "enabled",
-  "mod": "loaded",
-  "agents": 6,
-  "live": null
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'1.75.1' !== '1.75.0'
+
+    at file:///Users/robertdevore/2026/Kujolang/kujo-repos/kujo-cmd/scripts/check-command-code-host.mjs:21:57
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '1.75.1',
+  expected: '1.75.0',
+  operator: 'strictEqual',
+  diff: 'simple'
 }
+
+Node.js v26.7.0

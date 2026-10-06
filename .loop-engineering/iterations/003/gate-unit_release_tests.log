@@ -13,24 +13,26 @@ npm warn Unknown user config "python". This will stop working in the next major 
 > @kujolang/kujo-cmd@0.1.4 test
 > node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
 
-✔ portable profiles expose a growing catalog without changing installation (17.057424ms)
-✔ ability overrides affect exposure, not the installed source catalog (4.779954ms)
-✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (74.382578ms)
-✔ tests/release.test.mjs (1116.556406ms)
-✔ approval, idempotency, receipts, restart, and cancellation fail closed (55.975174ms)
-✔ concurrent keyed approvals execute once across runtime instances (122.409684ms)
-✔ bounded output and sharded idempotency state prevent unbounded hot files (749.896243ms)
-✔ workspace path resolution rejects intermediate symbolic-link escapes (33.952522ms)
-✔ skill cleanup rejects a forged traversal manifest before deletion (11.21428ms)
-✔ Command Code asset cleanup rejects an unowned manifest entry (4.215195ms)
-✔ project configuration cannot override trusted executable or source locations (77.320738ms)
-✔ purge guard rejects roots that contain the user home or working directory (0.947597ms)
-✔ setup, profiles, repair, and uninstall preserve unrelated host config (1423.847341ms)
-ℹ tests 13
+✔ portable profiles expose a growing catalog without changing installation (23.06696ms)
+✔ ability overrides affect exposure, not the installed source catalog (3.298666ms)
+✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (79.305273ms)
+✔ Lens browser status requires both the bridge dependency and browser executable (518.795408ms)
+✔ Lens browser installer uses the locked bridge lifecycle and verifies Chromium (416.434002ms)
+✔ tests/release.test.mjs (1177.785924ms)
+✔ approval, idempotency, receipts, restart, and cancellation fail closed (67.227652ms)
+✔ concurrent keyed approvals execute once across runtime instances (136.5641ms)
+✔ bounded output and sharded idempotency state prevent unbounded hot files (1037.58736ms)
+✔ workspace path resolution rejects intermediate symbolic-link escapes (18.159257ms)
+✔ skill cleanup rejects a forged traversal manifest before deletion (9.785493ms)
+✔ Command Code asset cleanup rejects an unowned manifest entry (3.938304ms)
+✔ project configuration cannot override trusted executable or source locations (95.526301ms)
+✔ purge guard rejects roots that contain the user home or working directory (4.538106ms)
+✔ setup, profiles, repair, and uninstall preserve unrelated host config (1722.322079ms)
+ℹ tests 15
 ℹ suites 0
-ℹ pass 13
+ℹ pass 15
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1654.842181
+ℹ duration_ms 1986.505045

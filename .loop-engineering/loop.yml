@@ -1,4 +1,4 @@
-objective: "Add the next broadly useful Kujo integrations to Command Code: offline Tribunal decision review, Dossier evidence inspection, and Howl showcase validation and rendering."
+objective: "Add Lens browser QA to Command Code with flow validation, approval-gated page checks, explicit browser dependency installation, diagnostics, and real local-browser verification."
 checklist_file: ""
 max_iterations: 4
 max_no_progress: 2
