@@ -13,21 +13,21 @@ npm warn Unknown user config "python". This will stop working in the next major 
 > @kujolang/kujo-cmd@0.1.4 test
 > node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
 
-✔ portable profiles expose a growing catalog without changing installation (13.205077ms)
-✔ ability overrides affect exposure, not the installed source catalog (3.564405ms)
-✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (72.165685ms)
-✔ Lens browser status requires both the bridge dependency and browser executable (456.891336ms)
-✔ Lens browser installer uses the locked bridge lifecycle and verifies Chromium (406.879164ms)
-✔ tests/release.test.mjs (1269.819186ms)
-✔ approval, idempotency, receipts, restart, and cancellation fail closed (50.791217ms)
-✔ concurrent keyed approvals execute once across runtime instances (122.30489ms)
-✔ bounded output and sharded idempotency state prevent unbounded hot files (777.505417ms)
-✔ workspace path resolution rejects intermediate symbolic-link escapes (18.245782ms)
-✔ skill cleanup rejects a forged traversal manifest before deletion (10.602607ms)
-✔ Command Code asset cleanup rejects an unowned manifest entry (4.280101ms)
-✔ project configuration cannot override trusted executable or source locations (81.774737ms)
-✔ purge guard rejects roots that contain the user home or working directory (1.150695ms)
-✔ setup, profiles, repair, and uninstall preserve unrelated host config (1602.538477ms)
+✔ portable profiles expose a growing catalog without changing installation (14.506512ms)
+✔ ability overrides affect exposure, not the installed source catalog (5.392602ms)
+✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (93.68302ms)
+✔ Lens browser status requires both the bridge dependency and browser executable (466.558498ms)
+✔ Lens browser installer uses the locked bridge lifecycle and verifies Chromium (413.272519ms)
+✔ tests/release.test.mjs (1111.126863ms)
+✔ approval, idempotency, receipts, restart, and cancellation fail closed (67.806956ms)
+✔ concurrent keyed approvals execute once across runtime instances (124.340394ms)
+✔ bounded output and sharded idempotency state prevent unbounded hot files (822.144022ms)
+✔ workspace path resolution rejects intermediate symbolic-link escapes (13.410337ms)
+✔ skill cleanup rejects a forged traversal manifest before deletion (14.023357ms)
+✔ Command Code asset cleanup rejects an unowned manifest entry (4.689389ms)
+✔ project configuration cannot override trusted executable or source locations (88.337108ms)
+✔ purge guard rejects roots that contain the user home or working directory (0.909409ms)
+✔ setup, profiles, repair, and uninstall preserve unrelated host config (1631.495056ms)
 ℹ tests 15
 ℹ suites 0
 ℹ pass 15
@@ -35,4 +35,4 @@ npm warn Unknown user config "python". This will stop working in the next major 
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1844.441977
+ℹ duration_ms 1842.710608
