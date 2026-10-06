@@ -11,6 +11,7 @@
     "lib/",
     "catalog/",
     ".generated/",
+    "scripts/check-command-code-host.mjs",
     "README.md",
     "LICENSE",
     "SECURITY.md",
@@ -21,10 +22,11 @@
     "prepack": "npm run build",
     "pretest": "npm run build",
     "test": "node --test tests/catalog.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs",
-    "test:e2e": "node tests/e2e.test.mjs"
+    "test:e2e": "node tests/e2e.test.mjs",
+    "test:command-code": "node scripts/check-command-code-host.mjs"
   },
   "dependencies": {
-    "@kujolang/kujo-runtime": "1.4.0"
+    "@kujolang/kujo-runtime": "1.8.0"
   },
   "publishConfig": {
     "access": "public"

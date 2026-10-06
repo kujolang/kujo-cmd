@@ -16,7 +16,7 @@ const server = join(packageRoot, "bin", "kujo-cmd-mcp.mjs");
 const sourceRoot = process.env.KUJO_SOURCE_ROOT ? resolve(process.env.KUJO_SOURCE_ROOT) : resolve(root, "..");
 const kujo = process.env.KUJO_BIN
   ? resolve(process.env.KUJO_BIN)
-  : join(root, "node_modules", ".bin", process.platform === "win32" ? "kujo.cmd" : "kujo");
+  : (await import("@kujolang/kujo-runtime")).resolveKujoBinary();
 
 function rpcProcess(env) {
   const child = spawn(process.execPath, [server], { env: { ...process.env, ...env }, stdio: ["pipe", "pipe", "pipe"] });
@@ -56,7 +56,7 @@ message = await rpc.request("tools/call", { name: "kujo_scout_inspect", argument
 assert.equal(message.result.structuredContent.code, "ability_approval_required");
 const approval = JSON.parse((await exec(process.execPath, [cli, "approve", "--project", project, "--ability", "kujo.scout.repository.inspect", "--invocation", "scout-1", "--input", JSON.stringify(scoutInput), "--json"], { env: { ...process.env, ...env } })).stdout);
 message = await rpc.request("tools/call", { name: "kujo_scout_inspect", arguments: { ...scoutInput, _kujo: { invocationId: "scout-1", idempotencyKey: "scout-key", approvalId: approval.approval_id } } });
-assert.equal(message.result.structuredContent.ok, true); assert.equal(message.result.structuredContent.receipt.approval_id, approval.approval_id);
+assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent)); assert.equal(message.result.structuredContent.receipt.approval_id, approval.approval_id);
 const receiptId = message.result.structuredContent.receipt.receipt_id;
 rpc.close();
 

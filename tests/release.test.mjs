@@ -22,6 +22,7 @@ for (const required of [
   "catalog/profiles.json",
   "catalog/sources.json",
   "lib/version.mjs",
+  "scripts/check-command-code-host.mjs",
   "README.md",
   "SECURITY.md",
 ]) assert.ok(files.has(required), `missing ${required}`);
@@ -31,7 +32,7 @@ assert.equal(report.version, VERSION);
 
 const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 assert.equal(VERSION, packageJson.version);
-assert.equal(packageJson.dependencies["@kujolang/kujo-runtime"], "1.4.0");
+assert.equal(packageJson.dependencies["@kujolang/kujo-runtime"], "1.8.0");
 assert.equal(packageJson.repository.url, "git+https://github.com/kujolang/kujo-cmd.git");
 assert.equal(packageJson.homepage, "https://github.com/kujolang/kujo-cmd#readme");
 assert.equal(packageJson.bugs.url, "https://github.com/kujolang/kujo-cmd/issues");
