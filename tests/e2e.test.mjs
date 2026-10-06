@@ -34,7 +34,7 @@ await writeFile(join(project, "README.md"), "# Fixture\n"); await writeFile(join
 await exec("git", ["init", "-q"], { cwd: project }); await exec("git", ["add", "."], { cwd: project }); await exec("git", ["-c", "user.name=Kujo", "-c", "user.email=kujo@example.invalid", "commit", "-qm", "fixture"], { cwd: project }); await writeFile(join(project, "README.md"), "# Fixture\n\nChanged.\n");
 await exec(process.execPath, [join(packageRoot, "scripts", "build-release.mjs")]);
 const env = { KUJO_CMD_HOME: home, KUJO_CMD_PROJECT: project, KUJO_BIN: kujo };
-const localCatalogAvailable = ["ability", "scout", "scent", "patchbrief", "changebucket", "shipcheck", "dispatch", "runledger", "watchdog", "rag", "fence", "spec", "eval", "kujo-skills"]
+const localCatalogAvailable = ["ability", "scout", "scent", "patchbrief", "changebucket", "shipcheck", "dispatch", "runledger", "watchdog", "rag", "fence", "spec", "eval", "kujo-skills", "casefile", "concord", "muzzle", "kennel"]
   .every((source) => existsSync(join(sourceRoot, source)));
 const setupArgs = [cli, "setup", "--project", project, ...(localCatalogAvailable ? ["--source-root", sourceRoot] : []), "--json"];
 const setup = JSON.parse((await exec(process.execPath, setupArgs, { env: { ...process.env, ...env }, timeout: 180_000 })).stdout);
@@ -61,12 +61,13 @@ const receiptId = message.result.structuredContent.receipt.receipt_id;
 rpc.close();
 
 await writeFile(join(project, "bad.spec.yml"), "name: missing-goal\n");
-const selected = JSON.parse((await exec(process.execPath, [cli, "profile", "kujo.profile.review", "--project", project, "--json"], { env: { ...process.env, ...env } })).stdout); assert.equal(selected.abilities, 9);
+const selected = JSON.parse((await exec(process.execPath, [cli, "profile", "kujo.profile.review", "--project", project, "--json"], { env: { ...process.env, ...env } })).stdout); assert.equal(selected.abilities, 10);
 rpc = rpcProcess(env); await rpc.request("initialize", { protocolVersion: "2025-11-25" });
-message = await rpc.request("tools/list"); assert.equal(message.result.tools.length, 9);
+message = await rpc.request("tools/list"); assert.equal(message.result.tools.length, 10); assert.ok(message.result.tools.some((tool) => tool.name === "kujo_concord_scan"));
 message = await rpc.request("tools/call", { name: "kujo_scout_inspect", arguments: { ...scoutInput, _kujo: { invocationId: "scout-2", idempotencyKey: "scout-key" } } });
 assert.equal(message.result.structuredContent.replayed, true); assert.equal(message.result.structuredContent.receipt.receipt_id, receiptId);
 message = await rpc.request("tools/call", { name: "kujo_changebucket_measure", arguments: { path: ".", base: "HEAD" } }); assert.equal(message.result.structuredContent.ok, true);
+message = await rpc.request("tools/call", { name: "kujo_concord_scan", arguments: { path: "." } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
 message = await rpc.request("tools/call", { name: "kujo_spec_validate", arguments: { path: ".", file: "bad.spec.yml", strict: true } }); assert.equal(message.result.structuredContent.ok, false); assert.equal(message.result.structuredContent.receipt.error.code, "kujo_command_failed");
 message = await rpc.request("tools/call", { name: "kujo_ability_receipts", arguments: { limit: 50 } });
 assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
@@ -76,5 +77,5 @@ rpc.close();
 const config = JSON.parse(await readFile(join(project, ".kujo", "cmd.json"), "utf8"));
 const installation = JSON.parse(await readFile(join(home, "installation.json"), "utf8"));
 assert.equal(config.sources, undefined);
-assert.equal(Object.keys(installation.sources).length, 14);
+assert.equal(Object.keys(installation.sources).length, 18);
 console.log("Command Code local package compatibility: setup, discovery, schema metadata, canonical invocation, approvals, receipts, concurrency, and restart passed");

@@ -16,7 +16,7 @@
     "description": "Architecture, task-contract, context, and change-footprint review tools.",
     "default": false,
     "extends": ["kujo.profile.essentials"],
-    "ability_ids": ["kujo.changebucket.changes.measure", "kujo.fence.architecture.check", "kujo.spec.contract.validate", "kujo.scent.context.pack"],
+    "ability_ids": ["kujo.changebucket.changes.measure", "kujo.fence.architecture.check", "kujo.spec.contract.validate", "kujo.scent.context.pack", "kujo.concord.artifacts.scan"],
     "metadata": { "label": "Review", "risk": "local-write" }
   },
   {
@@ -26,7 +26,7 @@
     "description": "Verification and durable run evidence for release work.",
     "default": false,
     "extends": ["kujo.profile.review"],
-    "ability_ids": ["kujo.eval.suite.run", "kujo.runledger.runs.report"],
+    "ability_ids": ["kujo.eval.suite.run", "kujo.runledger.runs.report", "kujo.casefile.failure.capture", "kujo.watchdog.telemetry.record"],
     "metadata": { "label": "Ship", "risk": "execute" }
   },
   {
@@ -36,7 +36,7 @@
     "description": "All installed local Kujo capabilities, including orchestration, RAG, and optional Watchdog health.",
     "default": false,
     "extends": ["kujo.profile.ship"],
-    "ability_ids": ["kujo.dispatch.workflow.validate", "kujo.rag.knowledge.query", "kujo.watchdog.service.health"],
+    "ability_ids": ["kujo.dispatch.workflow.validate", "kujo.dispatch.workflow.run", "kujo.rag.knowledge.query", "kujo.rag.knowledge.ingest", "kujo.watchdog.service.health", "kujo.muzzle.workflow.run", "kujo.kennel.project.validate", "kujo.kennel.dependencies.install"],
     "metadata": { "label": "Full", "risk": "advanced" }
   }
 ]

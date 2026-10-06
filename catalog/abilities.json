@@ -65,8 +65,48 @@
     "adapter":"rag","source":"rag"
   },
   {
-    "definition": {"schema":"kujo.ability/v1","id":"kujo.watchdog.service.health","version":"1.0.0","title":"Check local Watchdog","description":"Read health from an optional loopback-only Kujo Watchdog service.","input_schema":{"type":"object","properties":{"url":{"type":"string","maxLength":2048,"default":"http://127.0.0.1:8788"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.watchdog.telemetry"}],"idempotency":{"mode":"intrinsic"}},
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.watchdog.service.health","version":"1.0.0","title":"Check local Watchdog","description":"Read health from an optional loopback-only Kujo Watchdog service.","input_schema":{"type":"object","properties":{"url":{"type":"string","maxLength":2048,"default":"http://127.0.0.1:7700"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.watchdog.telemetry"}],"idempotency":{"mode":"intrinsic"}},
     "tool": {"name":"kujo_watchdog_health","description":"Check the optional local Kujo Watchdog service. Only loopback URLs are accepted."},
     "adapter":"watchdog","source":"watchdog"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.concord.artifacts.scan","version":"1.0.0","title":"Scan artifact drift","description":"Scan repository documentation, examples, evaluations, and metadata for drift with Concord.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.repository.artifacts"}],"idempotency":{"mode":"intrinsic"}},
+    "tool": {"name":"kujo_concord_scan","description":"Run a read-only canonical Concord artifact-drift scan and return its JSON report."},
+    "adapter":"concord","source":"concord"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.casefile.failure.capture","version":"1.0.0","title":"Capture failure evidence","description":"Create a redacted CaseFile evidence bundle from an existing local log file.","input_schema":{"type":"object","required":["log_file"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"log_file":{"type":"string","minLength":1,"maxLength":4096},"name":{"type":"string","maxLength":200,"default":"command-code-failure"},"notes":{"type":"string","maxLength":4000},"output_dir":{"type":"string","maxLength":4096,"default":".casefile/cases"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.failure.logs"},{"kind":"write","resource":"kujo.casefile.artifacts"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_casefile_capture","description":"Capture an existing failure log into a redacted canonical CaseFile bundle. Requires one-time approval."},
+    "adapter":"casefile","source":"casefile"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.muzzle.workflow.run","version":"1.0.0","title":"Run quiet workflow","description":"Run a repository-defined Muzzle workflow with bounded output and its safety policy.","input_schema":{"type":"object","required":["workflow"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"workflow":{"type":"string","minLength":1,"maxLength":128,"pattern":"^[A-Za-z0-9][A-Za-z0-9._-]*$"},"args":{"type":"array","maxItems":32,"items":{"type":"string","maxLength":2048}},"approve_network":{"type":"boolean","default":false}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"external","resource":"kujo.muzzle.workflow"},{"kind":"write","resource":"kujo.muzzle.logs"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_muzzle_run","description":"Run an allowlisted repository Muzzle workflow under enforced policy and bounded logging. Requires one-time approval."},
+    "adapter":"muzzle","source":"muzzle"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.kennel.project.validate","version":"1.0.0","title":"Validate Kennel project","description":"Validate the local Kennel manifest and dependency declarations without installing packages.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.kennel.manifest"}],"idempotency":{"mode":"intrinsic"}},
+    "tool": {"name":"kujo_kennel_validate","description":"Validate a local Kennel package manifest and dependency declarations."},
+    "adapter":"kennel_validate","source":"kennel"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.kennel.dependencies.install","version":"1.0.0","title":"Install Kennel dependencies","description":"Resolve and install the dependencies declared by a local Kennel project.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."},"allow_mutable_ref":{"type":"boolean","default":false}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"external","resource":"kujo.kennel.registry"},{"kind":"write","resource":"kujo.kennel.dependencies"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_kennel_install","description":"Resolve and install Kennel dependencies. Mutable refs remain blocked unless explicitly requested; requires one-time approval."},
+    "adapter":"kennel_install","source":"kennel"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.dispatch.workflow.run","version":"1.0.0","title":"Run Dispatch workflow","description":"Execute a validated Dispatch workflow and retain its local run evidence.","input_schema":{"type":"object","required":["topic","workflow_file"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"topic":{"type":"string","minLength":1,"maxLength":4000},"workflow_file":{"type":"string","minLength":1,"maxLength":4096},"input_json":{"type":"string","maxLength":32768,"default":"{}"},"output_dir":{"type":"string","maxLength":4096,"default":".kujo/dispatch"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"external","resource":"kujo.dispatch.agents"},{"kind":"write","resource":"kujo.dispatch.runs"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_dispatch_run","description":"Execute a canonical Dispatch workflow non-interactively and retain run evidence. Requires one-time approval."},
+    "adapter":"dispatch_run","source":"dispatch"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.rag.knowledge.ingest","version":"1.0.0","title":"Ingest local knowledge","description":"Ingest a bounded local path into the configured Kujo RAG namespace.","input_schema":{"type":"object","required":["ingest_path"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"ingest_path":{"type":"string","minLength":1,"maxLength":4096},"namespace":{"type":"string","maxLength":256,"default":"default"},"recursive":{"type":"boolean","default":true}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"external","resource":"kujo.rag.embeddings"},{"kind":"write","resource":"kujo.rag.index"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_rag_ingest","description":"Ingest local files into a canonical Kujo RAG namespace. Provider configuration may use external embeddings; requires one-time approval."},
+    "adapter":"rag_ingest","source":"rag"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.watchdog.telemetry.record","version":"1.0.0","title":"Record Watchdog telemetry","description":"Submit one metadata-only correlated event to an optional loopback Kujo Watchdog service.","input_schema":{"type":"object","required":["name"],"properties":{"name":{"type":"string","minLength":1,"maxLength":160},"status":{"type":"string","enum":["unset","ok","error","cancelled","timeout","denied"],"default":"ok"},"session_id":{"type":"string","maxLength":160},"run_id":{"type":"string","maxLength":160},"agent_id":{"type":"string","maxLength":160},"tool_call_id":{"type":"string","maxLength":160},"url":{"type":"string","maxLength":2048,"default":"http://127.0.0.1:7700"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"external","resource":"kujo.watchdog.telemetry"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_watchdog_record","description":"Submit metadata-only session, run, agent, and tool correlation to loopback Watchdog. Requires one-time approval."},
+    "adapter":"watchdog_record","source":"watchdog"
   }
 ]
