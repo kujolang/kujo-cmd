@@ -1,0 +1,36 @@
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.1.4 pretest
+> npm run build
+
+npm warn Unknown env config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.1.4 build
+> node scripts/build-release.mjs
+
+
+> @kujolang/kujo-cmd@0.1.4 test
+> node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
+
+✔ portable profiles expose a growing catalog without changing installation (12.348798ms)
+✔ ability overrides affect exposure, not the installed source catalog (2.616557ms)
+✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (83.365568ms)
+✔ tests/release.test.mjs (1037.528414ms)
+✔ approval, idempotency, receipts, restart, and cancellation fail closed (54.36546ms)
+✔ concurrent keyed approvals execute once across runtime instances (121.254043ms)
+✔ bounded output and sharded idempotency state prevent unbounded hot files (725.430329ms)
+✔ workspace path resolution rejects intermediate symbolic-link escapes (8.968423ms)
+✔ skill cleanup rejects a forged traversal manifest before deletion (7.677796ms)
+✔ Command Code asset cleanup rejects an unowned manifest entry (4.714583ms)
+✔ project configuration cannot override trusted executable or source locations (71.179252ms)
+✔ purge guard rejects roots that contain the user home or working directory (0.9172ms)
+✔ setup, profiles, repair, and uninstall preserve unrelated host config (1387.763613ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1604.931727

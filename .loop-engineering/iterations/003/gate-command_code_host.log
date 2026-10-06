@@ -11,8 +11,7 @@ AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
 
 '1.75.0' !== '1.74.3'
 
-    at file:///Users/robertdevore/2026/Kujolang/kujo-repos/kujo-cmd/scripts/check-command-code-host.mjs:21:57
-    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    at file:///Users/robertdevore/2026/Kujolang/kujo-repos/kujo-cmd/scripts/check-command-code-host.mjs:21:57 {
   generatedMessage: true,
   code: 'ERR_ASSERTION',
   actual: '1.75.0',

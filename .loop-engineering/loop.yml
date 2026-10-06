@@ -1,4 +1,4 @@
-objective: "Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents."
+objective: "Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools."
 checklist_file: ""
 max_iterations: 4
 max_no_progress: 2

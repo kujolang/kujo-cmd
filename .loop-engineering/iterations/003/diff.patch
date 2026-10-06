@@ -1,0 +1,248 @@
+diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
+index 35f2064..0d55cc8 100644
+--- a/.loop-engineering/iterations/001/context.md
++++ b/.loop-engineering/iterations/001/context.md
+@@ -1,6 +1,6 @@
+ # Context
+ 
+-- objective: Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents.
+-- git_head: 2dc6d58
++- objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
++- git_head: 1ecf491
+ - changed_files:
+-  - none
++  - .loop-engineering/loop.yml
+diff --git a/.loop-engineering/iterations/001/diff.patch b/.loop-engineering/iterations/001/diff.patch
+index e69de29..3c09963 100644
+--- a/.loop-engineering/iterations/001/diff.patch
++++ b/.loop-engineering/iterations/001/diff.patch
+@@ -0,0 +1,24 @@
++diff --git a/.loop-engineering/iterations/001/context.md b/.loop-engineering/iterations/001/context.md
++index 35f2064..0d55cc8 100644
++--- a/.loop-engineering/iterations/001/context.md
+++++ b/.loop-engineering/iterations/001/context.md
++@@ -1,6 +1,6 @@
++ # Context
++ 
++-- objective: Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents.
++-- git_head: 2dc6d58
+++- objective: Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools.
+++- git_head: 1ecf491
++ - changed_files:
++-  - none
+++  - .loop-engineering/loop.yml
++diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
++index 0774cf9..3b0bb0f 100644
++--- a/.loop-engineering/loop.yml
+++++ b/.loop-engineering/loop.yml
++@@ -1,4 +1,4 @@
++-objective: "Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents."
+++objective: "Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools."
++ checklist_file: ""
++ max_iterations: 4
++ max_no_progress: 2
+diff --git a/.loop-engineering/iterations/001/eval.log b/.loop-engineering/iterations/001/eval.log
+index 52891c7..7e895fe 100644
+--- a/.loop-engineering/iterations/001/eval.log
++++ b/.loop-engineering/iterations/001/eval.log
+@@ -16,19 +16,19 @@ npm warn Unknown user config "python". This will stop working in the next major
+ > @kujolang/kujo-cmd@0.1.4 test
+ > node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
+ 
+-✔ portable profiles expose a growing catalog without changing installation (12.273219ms)
+-✔ ability overrides affect exposure, not the installed source catalog (4.981171ms)
+-✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (71.861735ms)
+-✔ tests/release.test.mjs (1051.087343ms)
+-✔ approval, idempotency, receipts, restart, and cancellation fail closed (53.763787ms)
+-✔ concurrent keyed approvals execute once across runtime instances (119.398686ms)
+-✔ bounded output and sharded idempotency state prevent unbounded hot files (714.060878ms)
+-✔ workspace path resolution rejects intermediate symbolic-link escapes (15.20751ms)
+-✔ skill cleanup rejects a forged traversal manifest before deletion (10.912043ms)
+-✔ Command Code asset cleanup rejects an unowned manifest entry (4.537855ms)
+-✔ project configuration cannot override trusted executable or source locations (63.28991ms)
+-✔ purge guard rejects roots that contain the user home or working directory (0.901135ms)
+-✔ setup, profiles, repair, and uninstall preserve unrelated host config (1344.367513ms)
++✔ portable profiles expose a growing catalog without changing installation (23.818992ms)
++✔ ability overrides affect exposure, not the installed source catalog (3.576678ms)
++✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (72.752627ms)
++✔ tests/release.test.mjs (1342.638385ms)
++✔ approval, idempotency, receipts, restart, and cancellation fail closed (55.218845ms)
++✔ concurrent keyed approvals execute once across runtime instances (127.763161ms)
++✔ bounded output and sharded idempotency state prevent unbounded hot files (872.171863ms)
++✔ workspace path resolution rejects intermediate symbolic-link escapes (10.209857ms)
++✔ skill cleanup rejects a forged traversal manifest before deletion (7.795108ms)
++✔ Command Code asset cleanup rejects an unowned manifest entry (3.993249ms)
++✔ project configuration cannot override trusted executable or source locations (76.167484ms)
++✔ purge guard rejects roots that contain the user home or working directory (1.202839ms)
++✔ setup, profiles, repair, and uninstall preserve unrelated host config (1483.71959ms)
+ ℹ tests 13
+ ℹ suites 0
+ ℹ pass 13
+@@ -36,7 +36,7 @@ npm warn Unknown user config "python". This will stop working in the next major
+ ℹ cancelled 0
+ ℹ skipped 0
+ ℹ todo 0
+-ℹ duration_ms 1571.489726
++ℹ duration_ms 1755.514676
+ gate unit_release_tests: pass
+ 
+ ## gate: package_e2e
+@@ -56,18 +56,27 @@ npm warn Unknown user config "python". This will stop working in the next major
+ > @kujolang/kujo-cmd@0.1.4 test:command-code
+ > node scripts/check-command-code-host.mjs
+ 
+-{
+-  "ok": true,
+-  "command_code": "1.74.3",
+-  "abilities": 5,
+-  "skills": 3,
+-  "mcp": "enabled",
+-  "mod": "loaded",
+-  "agents": 4,
+-  "live": null
++node:internal/modules/run_main:107
++    triggerUncaughtException(
++    ^
++
++AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++
++'1.75.0' !== '1.74.3'
++
++    at file:///Users/robertdevore/2026/Kujolang/kujo-repos/kujo-cmd/scripts/check-command-code-host.mjs:21:57
++    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
++  generatedMessage: true,
++  code: 'ERR_ASSERTION',
++  actual: '1.75.0',
++  expected: '1.74.3',
++  operator: 'strictEqual',
++  diff: 'simple'
+ }
+-gate command_code_host: pass
++
++Node.js v26.7.0
+ 
+ ## gate: diff_check
+ $ git diff --check
+-gate diff_check: pass
++.loop-engineering/iterations/001/diff.patch:7: trailing whitespace.
+++ 
+diff --git a/.loop-engineering/iterations/001/gate-command_code_host.log b/.loop-engineering/iterations/001/gate-command_code_host.log
+index 0ee0566..73e7f9b 100644
+--- a/.loop-engineering/iterations/001/gate-command_code_host.log
++++ b/.loop-engineering/iterations/001/gate-command_code_host.log
+@@ -3,13 +3,22 @@ npm warn Unknown user config "python". This will stop working in the next major
+ > @kujolang/kujo-cmd@0.1.4 test:command-code
+ > node scripts/check-command-code-host.mjs
+ 
+-{
+-  "ok": true,
+-  "command_code": "1.74.3",
+-  "abilities": 5,
+-  "skills": 3,
+-  "mcp": "enabled",
+-  "mod": "loaded",
+-  "agents": 4,
+-  "live": null
++node:internal/modules/run_main:107
++    triggerUncaughtException(
++    ^
++
++AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++
++'1.75.0' !== '1.74.3'
++
++    at file:///Users/robertdevore/2026/Kujolang/kujo-repos/kujo-cmd/scripts/check-command-code-host.mjs:21:57
++    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
++  generatedMessage: true,
++  code: 'ERR_ASSERTION',
++  actual: '1.75.0',
++  expected: '1.74.3',
++  operator: 'strictEqual',
++  diff: 'simple'
+ }
++
++Node.js v26.7.0
+diff --git a/.loop-engineering/iterations/001/gate-diff_check.log b/.loop-engineering/iterations/001/gate-diff_check.log
+index e69de29..c7d2582 100644
+--- a/.loop-engineering/iterations/001/gate-diff_check.log
++++ b/.loop-engineering/iterations/001/gate-diff_check.log
+@@ -0,0 +1,2 @@
++.loop-engineering/iterations/001/diff.patch:7: trailing whitespace.
+++ 
+diff --git a/.loop-engineering/iterations/001/gate-unit_release_tests.log b/.loop-engineering/iterations/001/gate-unit_release_tests.log
+index 70ad10a..a2aab56 100644
+--- a/.loop-engineering/iterations/001/gate-unit_release_tests.log
++++ b/.loop-engineering/iterations/001/gate-unit_release_tests.log
+@@ -13,19 +13,19 @@ npm warn Unknown user config "python". This will stop working in the next major
+ > @kujolang/kujo-cmd@0.1.4 test
+ > node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
+ 
+-✔ portable profiles expose a growing catalog without changing installation (12.273219ms)
+-✔ ability overrides affect exposure, not the installed source catalog (4.981171ms)
+-✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (71.861735ms)
+-✔ tests/release.test.mjs (1051.087343ms)
+-✔ approval, idempotency, receipts, restart, and cancellation fail closed (53.763787ms)
+-✔ concurrent keyed approvals execute once across runtime instances (119.398686ms)
+-✔ bounded output and sharded idempotency state prevent unbounded hot files (714.060878ms)
+-✔ workspace path resolution rejects intermediate symbolic-link escapes (15.20751ms)
+-✔ skill cleanup rejects a forged traversal manifest before deletion (10.912043ms)
+-✔ Command Code asset cleanup rejects an unowned manifest entry (4.537855ms)
+-✔ project configuration cannot override trusted executable or source locations (63.28991ms)
+-✔ purge guard rejects roots that contain the user home or working directory (0.901135ms)
+-✔ setup, profiles, repair, and uninstall preserve unrelated host config (1344.367513ms)
++✔ portable profiles expose a growing catalog without changing installation (23.818992ms)
++✔ ability overrides affect exposure, not the installed source catalog (3.576678ms)
++✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (72.752627ms)
++✔ tests/release.test.mjs (1342.638385ms)
++✔ approval, idempotency, receipts, restart, and cancellation fail closed (55.218845ms)
++✔ concurrent keyed approvals execute once across runtime instances (127.763161ms)
++✔ bounded output and sharded idempotency state prevent unbounded hot files (872.171863ms)
++✔ workspace path resolution rejects intermediate symbolic-link escapes (10.209857ms)
++✔ skill cleanup rejects a forged traversal manifest before deletion (7.795108ms)
++✔ Command Code asset cleanup rejects an unowned manifest entry (3.993249ms)
++✔ project configuration cannot override trusted executable or source locations (76.167484ms)
++✔ purge guard rejects roots that contain the user home or working directory (1.202839ms)
++✔ setup, profiles, repair, and uninstall preserve unrelated host config (1483.71959ms)
+ ℹ tests 13
+ ℹ suites 0
+ ℹ pass 13
+@@ -33,4 +33,4 @@ npm warn Unknown user config "python". This will stop working in the next major
+ ℹ cancelled 0
+ ℹ skipped 0
+ ℹ todo 0
+-ℹ duration_ms 1571.489726
++ℹ duration_ms 1755.514676
+diff --git a/.loop-engineering/iterations/001/verdict.yml b/.loop-engineering/iterations/001/verdict.yml
+index ebbbe06..30640a2 100644
+--- a/.loop-engineering/iterations/001/verdict.yml
++++ b/.loop-engineering/iterations/001/verdict.yml
+@@ -1,6 +1,6 @@
+ iteration: 1
+-verdict: success
+-progress: 1
+-required_failures: 0
++verdict: failed
++progress: 0
++required_failures: 2
+ external_blockers: 0
+-stop_reason: "success: required gates passed"
++stop_reason: "required gate failed"
+diff --git a/.loop-engineering/ledger.tsv b/.loop-engineering/ledger.tsv
+index a287f34..3319dea 100644
+--- a/.loop-engineering/ledger.tsv
++++ b/.loop-engineering/ledger.tsv
+@@ -1,2 +1,4 @@
+ iteration	action	verdict	progress	evidence	justification
+ 001	configured-gates	success	1	iterations/001/eval.log	success: required gates passed
++001	configured-gates	failed	0	iterations/001/eval.log	required gate failed
++002	configured-gates	failed	0	iterations/002/eval.log	required gate failed
+diff --git a/.loop-engineering/loop.yml b/.loop-engineering/loop.yml
+index 0774cf9..3b0bb0f 100644
+--- a/.loop-engineering/loop.yml
++++ b/.loop-engineering/loop.yml
+@@ -1,4 +1,4 @@
+-objective: "Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents."
++objective: "Add the next broadly useful Kujo integrations to Command Code: Redact safety workflows, VersionSeal verification, PackWrite pack workflows, and manual RunLedger lifecycle tools."
+ checklist_file: ""
+ max_iterations: 4
+ max_no_progress: 2
