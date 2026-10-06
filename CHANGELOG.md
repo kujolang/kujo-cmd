@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Verify setup, MCP discovery, skills discovery, and an optional live Kujo tool
+  call against an installed Command Code host.
+- Update the bundled Kujo runtime to 1.8.0 and copy the resolved native runtime
+  rather than preserving an external executable symlink.
+
 ## 0.1.4 - 2026-09-14
 
 - Match the monochrome README badge system used across Kujo repositories.

@@ -17,16 +17,20 @@
 
 ## Partial or explicit degradation
 
-- Command Code supplies no trustworthy standard MCP session/model/agent
-  envelope. `_kujo` correlation fields are preserved but caller-asserted.
+- MCP still supplies no trustworthy standard session/model/agent envelope.
+  `_kujo` correlation fields are preserved but caller-asserted. Command Code
+  now exposes session, tool, subagent, and lifecycle events to host-specific
+  hooks and mods, which creates a viable optional correlation adapter without
+  changing the portable MCP contract.
 - Process termination is best-effort. A killed tool may have completed an
   external effect before cancellation; inspect receipts/artifacts before retry.
 - Command Code tool permissions do not mint Kujo approvals. Approval remains a
   separate CLI action so a model cannot approve itself.
 - Profiles select tools and corresponding skills, but Command Code currently
   needs a restart/tool refresh after profile changes.
-- Watchdog health is integrated; native turn/tool telemetry needs a lifecycle
-  API and is therefore not silently claimed.
+- Watchdog health is integrated. Native turn/tool telemetry is not yet wired,
+  although current Command Code mods now expose the lifecycle events needed for
+  an explicit host adapter.
 - Dispatch validation is exposed. Dispatch execution remains authoritative in
   Dispatch and should be added only with its provider and worker dependencies
   expressed as a canonical Ability pack.
@@ -38,13 +42,15 @@
 - A managed/hybrid Kujo execution service.
 - In-band self-approval.
 - Experimental mod hooks as an authorization boundary.
-- Command Code agents masquerading as Kujo Chain-of-Command workers.
-- Jidoka completion gating without a negotiated fail-closed host lifecycle.
+- Command Code agents masquerading as Kujo Chain-of-Command workers without an
+  explicit identity and delegation adapter.
+- Jidoka completion gating without an installed, reviewed Stop hook or mod.
 
 ## Remaining worthwhile generic work
 
-A separately versioned Host Capability contract could cover verified host
-identity, lifecycle events, native agent workers, telemetry, and candidate
-completion gates. It should be implemented only when at least two hosts expose
-stable equivalents. Command Code's current mod hooks are useful experimental
-input, not yet a safe cross-host contract.
+A separately versioned, optional Command Code host adapter is now worthwhile.
+Its mod can correlate session and subagent events, forward bounded telemetry to
+Watchdog/RunLedger, and implement reviewed Stop gates while the MCP projection
+remains portable and authoritative for Kujo Abilities. The adapter must not
+turn Command Code permission prompts into Kujo approvals or treat host agent
+IDs as Kujo Chain-of-Command identities without an explicit mapping contract.

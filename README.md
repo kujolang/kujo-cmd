@@ -136,7 +136,14 @@ Repository development can use existing Kujo checkouts without a download:
 npm run build
 node bin/kujo-cmd.mjs setup --source-root /path/to/kujo-repos
 npm test
+npm run test:e2e
+COMMAND_CODE_EXPECTED_VERSION=1.74.3 npm run test:command-code
 ```
+
+Set `KUJO_CMD_LIVE_MODEL` to include a real model-driven Command Code MCP call
+in the host check. Without it, the check still verifies that the installed
+Command Code version accepts the generated MCP configuration and discovers the
+projected Kujo skills.
 
 The release contains a generated snapshot of the generic Ability host runtime.
 `.generated/BUILD.json` pins its canonical source commit, path, and SHA-256
