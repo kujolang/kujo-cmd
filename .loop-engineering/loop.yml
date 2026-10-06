@@ -24,7 +24,7 @@ eval_gates:
     command: "npm run test:e2e"
     required: true
   - id: command_code_host
-    command: "COMMAND_CODE_EXPECTED_VERSION=1.75.0 npm run test:command-code"
+    command: "COMMAND_CODE_EXPECTED_VERSION=1.75.1 npm run test:command-code"
     required: true
   - id: diff_check
     command: "git diff --check -- CHANGELOG.md README.md assets catalog docs lib scripts tests"

@@ -72,7 +72,7 @@ not permanent records.
 
 Kujo CMD does not choose or proxy the model. Command Code can use its supported
 Ollama provider, including `ollama/glm-5.3:cloud`, independently of Kujo.
-Command Code 1.75.0 still checks that an auth value exists before entering its
+Command Code 1.75.1 still checks that an auth value exists before entering its
 documented local-only/BYOK path. The verified local launcher sets
 `CMD_LOCAL_ONLY=1` and the non-secret sentinel
 `COMMAND_CODE_API_KEY=local-only-placeholder`; it is not a Command Code

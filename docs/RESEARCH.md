@@ -1,7 +1,7 @@
 # Kujo Ability and Command Code research
 
 Research and implementation began on 2026-09-13. The current local
-implementation targets Command Code 1.75.0, Kujo runtime 1.8.0, Ability
+implementation targets Command Code 1.75.1, Kujo runtime 1.8.0, Ability
 `63d4367d677ce350bb2756dab02603170ca44cee`, and the exact product revisions in
 `catalog/sources.json`.
 
@@ -18,7 +18,7 @@ official npm distribution was treated as executable ground truth where public
 source and current behavior differed.
 
 The original live evidence below was collected with Command Code 1.53.1. A
-2026-10-06 compatibility recheck with 1.75.0 confirmed project MCP discovery,
+2026-10-06 compatibility recheck with 1.75.1 confirmed project MCP discovery,
 project skill discovery, and one model-driven `kujo_ability_catalog` call. The
 latest Command Code Desktop release tested alongside it was 0.1.48, whose
 bundled engine is 1.74.2 and shares the same MCP and skill configuration.
