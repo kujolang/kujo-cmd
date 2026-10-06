@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { resolveKujoBinary } from "@kujolang/kujo-runtime";
 import { loadCatalog } from "../lib/catalog.mjs";
@@ -43,6 +43,27 @@ try {
   const skills = (await exec(commandCode, ["skills", "list", "--debug"], { cwd: project, env })).stdout;
   for (const name of ["kujo-patchbrief-workflows", "kujo-scout-workflows", "kujo-shipcheck-workflows"]) assert.match(skills, new RegExp(`\\b${name}\\b`));
 
+  const executable = (await exec(process.platform === "win32" ? "where" : "which", [commandCode])).stdout.trim().split(/\r?\n/)[0];
+  const commandPackage = resolve(dirname(await realpath(executable)), "..");
+  const { createJiti } = await import(pathToFileURL(join(commandPackage, "node_modules", "jiti", "lib", "jiti.mjs")));
+  const projectedMod = join(project, ".commandcode", "mods", "kujo-command-bridge.ts");
+  process.env.KUJO_CMD_WATCHDOG_URL = "invalid:";
+  const loaded = await createJiti(import.meta.url).import(projectedMod);
+  delete process.env.KUJO_CMD_WATCHDOG_URL;
+  const hooks = []; const events = []; const subscribers = new Map();
+  loaded.default({ hooks(value) { hooks.push(value); return { dispose() {} }; }, on(name, handler) { events.push(name); subscribers.set(name, handler); return { dispose() {} }; } });
+  assert.ok(hooks.some((value) => value.afterToolCall && value.onStop && value.onRunEnd));
+  assert.deepEqual(events.sort(), ["model_request_start", "run_start", "subagent_start", "subagent_stop"]);
+  subscribers.get("run_start")({ type: "run_start", sessionId: "host-check" });
+  const lifecycle = hooks.find((value) => value.afterToolCall && value.onStop);
+  await lifecycle.afterToolCall({ toolCallId: "call-1", toolName: "mcp__kujo__kujo_shipcheck_scan", isError: true });
+  assert.equal((await lifecycle.onStop()).continue, true);
+  assert.equal(await lifecycle.onStop(), undefined);
+  for (const name of ["kujo-context-builder.md", "kujo-reviewer.md", "kujo-workflow-operator.md", "kujo-release-verifier.md"]) {
+    const agent = await readFile(join(project, ".commandcode", "agents", name), "utf8");
+    assert.match(agent, /mcp__kujo__kujo_/); assert.doesNotMatch(agent, /tools:\s*["']?\*/);
+  }
+
   let live = null;
   if (process.env.KUJO_CMD_LIVE_MODEL) {
     const liveOutput = (await exec(commandCode, [
@@ -65,7 +86,7 @@ try {
     live = { model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
   }
 
-  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", live }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "loaded", agents: 4, live }, null, 2)}\n`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }

@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
 import { createApp, loadProjectConfig } from "../lib/app.mjs";
 import { loadCatalog, profileAbilities } from "../lib/catalog.mjs";
-import { configureMcp, installProjection, installSources, projectSkills, removeMcp, removeProjectedSkills } from "../lib/install.mjs";
+import { configureMcp, installProjection, installSources, projectCommandCodeAssets, projectSkills, removeCommandCodeAssets, removeMcp, removeProjectedSkills } from "../lib/install.mjs";
 import { loadInstallation, writeInstallation } from "../lib/installation.mjs";
 import { readJson, writeJson } from "../lib/io.mjs";
 import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths } from "../lib/paths.mjs";
@@ -47,10 +47,10 @@ async function setup(opts) {
   const paths = projectPaths(project); const config = { schema: "kujo.cmd.config/v1", version: VERSION, installation_version: VERSION, profile, enabled: [], disabled: [], installed_at: installedAt };
   await writeJson(paths.config, config);
   const trustedConfig = { ...config, ...installation };
-  const skills = await projectSkills(catalog, trustedConfig, project); const mcp = await configureMcp(trustedConfig, project);
+  const skills = await projectSkills(catalog, trustedConfig, project); const hostAssets = await projectCommandCodeAssets(project); const mcp = await configureMcp(trustedConfig, project);
   const app = await createApp(project); const smoke = await app.runtime.execute({ abilityId: "kujo.ability.catalog.list", input: {}, controls: { host: "command-code", surface: "mcp", invocationId: `setup-${Date.now()}` } });
   if (!smoke.ok) throw new Error("local Ability smoke test failed");
-  return output({ ok: true, message: "Kujo is ready in Command Code.", project, profile, abilities: app.runtime.describe().length, skills: skills.length, mcp, execution: "local-stdio", hosted_service_required: false }, opts.json);
+  return output({ ok: true, message: "Kujo is ready in Command Code.", project, profile, abilities: app.runtime.describe().length, skills: skills.length, host_assets: hostAssets.length, mcp, execution: "local-stdio", hosted_service_required: false }, opts.json);
 }
 
 async function status(opts) {
@@ -147,7 +147,7 @@ async function watchdogProcessMatches(current) {
   return outcome.exitCode === 0 && outcome.stdout.includes(current.script);
 }
 
-async function repair(opts) { const project = resolve(opts.project || process.cwd()); const catalog = await loadCatalog(); const { config } = await loadProjectConfig(project, catalog); const skills = await projectSkills(catalog, config, project); const mcp = await configureMcp(config, project); output({ ok: true, message: "Kujo CMD projections repaired.", skills, mcp }, opts.json); }
+async function repair(opts) { const project = resolve(opts.project || process.cwd()); const catalog = await loadCatalog(); const { config } = await loadProjectConfig(project, catalog); const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project); const mcp = await configureMcp(config, project); output({ ok: true, message: "Kujo CMD projections repaired.", skills, host_assets: hostAssets, mcp }, opts.json); }
 
 async function update(opts) {
   const catalog = await loadCatalog();
@@ -164,14 +164,14 @@ async function update(opts) {
   const nextInstallation = await writeInstallation({ version: VERSION, sources, projection_root: projection.root, kujo_bin: projection.kujo, installed_at: installation.installed_at, updated_at: updatedAt });
   const nextProject = { ...projectConfig, version: VERSION, installation_version: VERSION, updated_at: updatedAt }; await writeJson(paths.config, nextProject);
   const config = { ...nextProject, ...nextInstallation };
-  const skills = await projectSkills(catalog, config, project); const mcp = await configureMcp(config, project);
-  output({ ok: true, message: "Kujo CMD updated without changing profile exposure.", profile: config.profile, enabled: config.enabled, disabled: config.disabled, skills, mcp }, opts.json);
+  const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project); const mcp = await configureMcp(config, project);
+  output({ ok: true, message: "Kujo CMD updated without changing profile exposure.", profile: config.profile, enabled: config.enabled, disabled: config.disabled, skills, host_assets: hostAssets, mcp }, opts.json);
 }
 
 async function uninstall(opts) {
   const project = resolve(opts.project || process.cwd()); const paths = projectPaths(project); const catalog = await loadCatalog();
   if (opts.purge) await loadInstallation(catalog);
-  await removeMcp(project); await removeProjectedSkills(catalog, project); await rm(paths.config, { force: true }); await rm(paths.projectionManifest, { force: true });
+  await removeMcp(project); await removeProjectedSkills(catalog, project); await removeCommandCodeAssets(project); await rm(paths.config, { force: true }); await rm(paths.projectionManifest, { force: true });
   if (opts.purge) await rm(assertSafePurgeRoot(homePaths().root), { recursive: true, force: true });
   output({ ok: true, message: `Kujo CMD removed from ${project}.${opts.purge ? " Shared local sources and receipts were purged." : " Shared local sources and receipts were preserved."}` }, opts.json);
 }

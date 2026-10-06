@@ -13,11 +13,13 @@ test("setup, profiles, repair, and uninstall preserve unrelated host config", as
   const root = await mkdtemp(join(tmpdir(), "kujo-cmd-setup-")); const project = join(root, "project"); const sources = join(root, "sources"); const home = join(root, "home"); const linkedRuntime = join(root, "kujo-runtime"); await mkdir(project); await mkdir(sources); await symlink(process.execPath, linkedRuntime);
   const catalog = await loadCatalog();
   for (const source of catalog.sources) { await mkdir(join(sources, source.id, "skills"), { recursive: true }); }
-  for (const name of ["kujo-scout-workflows", "kujo-patchbrief-workflows", "kujo-shipcheck-workflows", "kujo-changebucket-workflows", "kujo-fence-workflows", "kujo-spec-workflows", "kujo-scent-workflows", "kujo-eval-workflows", "kujo-dispatch-workflows", "kujo-runledger-workflows", "kujo-watchdog-workflows", "kujo-rag-workflows"]) { const path = join(sources, "kujo-skills", "skills", name); await mkdir(path, { recursive: true }); await writeFile(join(path, "SKILL.md"), `---\nname: ${name}\ndescription: fixture\n---\n`); }
+  for (const name of ["kujo-scout-workflows", "kujo-patchbrief-workflows", "kujo-shipcheck-workflows", "kujo-changebucket-workflows", "kujo-fence-workflows", "kujo-spec-workflows", "kujo-scent-workflows", "kujo-eval-workflows", "kujo-dispatch-workflows", "kujo-runledger-workflows", "kujo-watchdog-workflows", "kujo-rag-workflows", "kujo-casefile-workflows", "kujo-concord-workflows", "kujo-muzzle-workflows", "kujo-kennel-workflows"]) { const path = join(sources, "kujo-skills", "skills", name); await mkdir(path, { recursive: true }); await writeFile(join(path, "SKILL.md"), `---\nname: ${name}\ndescription: fixture\n---\n`); }
   await writeFile(join(project, ".mcp.json"), JSON.stringify({ mcpServers: { existing: { command: "existing" } } }));
   const env = { ...process.env, KUJO_CMD_HOME: home, KUJO_BIN: linkedRuntime };
-  let call = await exec(process.execPath, [cli, "setup", "--project", project, "--source-root", sources, "--json"], { env }); let result = JSON.parse(call.stdout); assert.equal(result.abilities, 5); assert.equal(result.hosted_service_required, false);
-  call = await exec(process.execPath, [cli, "profile", "kujo.profile.review", "--project", project, "--json"], { env }); result = JSON.parse(call.stdout); assert.equal(result.abilities, 9);
+  let call = await exec(process.execPath, [cli, "setup", "--project", project, "--source-root", sources, "--json"], { env }); let result = JSON.parse(call.stdout); assert.equal(result.abilities, 5); assert.equal(result.hosted_service_required, false); assert.equal(result.host_assets, 5);
+  assert.match(await readFile(join(project, ".commandcode", "mods", "kujo-command-bridge.ts"), "utf8"), /onStop/);
+  assert.match(await readFile(join(project, ".commandcode", "agents", "kujo-reviewer.md"), "utf8"), /mcp__kujo__kujo_concord_scan/);
+  call = await exec(process.execPath, [cli, "profile", "kujo.profile.review", "--project", project, "--json"], { env }); result = JSON.parse(call.stdout); assert.equal(result.abilities, 10);
   await exec(process.execPath, [cli, "disable", "kujo.fence.architecture.check", "--project", project, "--json"], { env });
   await exec(process.execPath, [cli, "enable", "kujo.eval.suite.run", "--project", project, "--json"], { env });
   call = await exec(process.execPath, [cli, "update", "--project", project, "--source-root", sources, "--json"], { env }); result = JSON.parse(call.stdout);
@@ -38,4 +40,5 @@ test("setup, profiles, repair, and uninstall preserve unrelated host config", as
   await exec(process.execPath, [cli, "repair", "--project", project, "--json"], { env });
   await exec(process.execPath, [cli, "uninstall", "--project", project, "--json"], { env });
   const after = JSON.parse(await readFile(join(project, ".mcp.json"), "utf8")); assert.ok(after.mcpServers.existing); assert.equal(after.mcpServers.kujo, undefined); assert.ok(await readFile(join(home, "receipts.jsonl"), "utf8"));
+  await assert.rejects(() => readFile(join(project, ".commandcode", "mods", "kujo-command-bridge.ts"), "utf8"), { code: "ENOENT" });
 });

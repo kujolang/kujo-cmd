@@ -21,6 +21,8 @@ for (const required of [
   "catalog/abilities.json",
   "catalog/profiles.json",
   "catalog/sources.json",
+  "assets/command-code/mods/kujo-command-bridge.ts",
+  "assets/command-code/agents/kujo-reviewer.md",
   "lib/version.mjs",
   "scripts/check-command-code-host.mjs",
   "README.md",

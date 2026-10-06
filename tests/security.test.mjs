@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadProjectConfig } from "../lib/app.mjs";
 import { loadCatalog } from "../lib/catalog.mjs";
-import { removeProjectedSkills } from "../lib/install.mjs";
+import { removeCommandCodeAssets, removeProjectedSkills } from "../lib/install.mjs";
 import { writeInstallation } from "../lib/installation.mjs";
 import { assertSafePurgeRoot, homePaths, safeExistingDirectory, safeOutputPath } from "../lib/paths.mjs";
 
@@ -32,6 +32,16 @@ test("skill cleanup rejects a forged traversal manifest before deletion", async 
   const catalog = await loadCatalog();
   await assert.rejects(() => removeProjectedSkills(catalog, project), { code: "kujo_skill_manifest_invalid" });
   assert.equal(await readFile(join(outside, "keep.txt"), "utf8"), "keep\n");
+});
+
+test("Command Code asset cleanup rejects an unowned manifest entry", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kujo-host-assets-"));
+  const project = join(root, "project");
+  await mkdir(join(project, ".kujo"), { recursive: true });
+  await writeFile(join(project, "keep.txt"), "keep\n");
+  await writeFile(join(project, ".kujo", "cmd-command-code.json"), JSON.stringify({ schema: "kujo.cmd.command-code-projection/v1", files: ["keep.txt"] }));
+  await assert.rejects(() => removeCommandCodeAssets(project), { code: "kujo_host_manifest_invalid" });
+  assert.equal(await readFile(join(project, "keep.txt"), "utf8"), "keep\n");
 });
 
 test("project configuration cannot override trusted executable or source locations", async () => {
