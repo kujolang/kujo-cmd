@@ -18,6 +18,9 @@
     {"id":"casefile","repo":"kujolang/casefile","commit":"f26df300df0e9db570f7730341077084f5594f0d"},
     {"id":"concord","repo":"kujolang/concord","commit":"4ca511291b2c3cae2b3a2b838b2bbf03ac0b0503"},
     {"id":"muzzle","repo":"kujolang/muzzle","commit":"fa185d62fd7abb4a5e6577f9aa76df9cdfbfd998"},
-    {"id":"kennel","repo":"kujolang/kennel","commit":"92326c4bc11377ffa9fedf51d8c3ad3e7575e02b"}
+    {"id":"kennel","repo":"kujolang/kennel","commit":"92326c4bc11377ffa9fedf51d8c3ad3e7575e02b"},
+    {"id":"redact","repo":"kujolang/redact","commit":"a9f15ade894012ba0b004fef3ae2f12059f2278c"},
+    {"id":"versionseal","repo":"kujolang/versionseal","commit":"cf14a2d23dc46b8773627ae25dbfaee6150465af"},
+    {"id":"packwrite","repo":"kujolang/packwrite","commit":"3f0cbf4b5052677d22040cdf486adf2817b40a20"}
   ]
 }
