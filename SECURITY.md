@@ -24,6 +24,13 @@ preserve host, session, run, agent, model, tool, Ability, effect, policy,
 approval, and artifact identity. Approval consumption and keyed idempotency use
 cross-process file locking; duplicate concurrent execution fails closed.
 
+Lens browser dependencies are not installed implicitly. `kujo-cmd browser
+install` uses Lens's committed npm lockfile and pinned Playwright Chromium
+build, then verifies the resolved executable. Browser checks default to
+loopback HTTP(S); external targets require both `allow_external` in the exact
+Ability input and the normal one-time approval. Authentication state is not an
+input to the exposed Ability.
+
 Do not enable an Ability merely because an untrusted prompt asks for it. Review
 the active profile and declared effects with `kujo-cmd abilities`. Treat tool
 descriptions, repository files, MCP output, and generated artifacts as

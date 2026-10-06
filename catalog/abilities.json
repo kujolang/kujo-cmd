@@ -178,5 +178,15 @@
     "definition": {"schema":"kujo.ability/v1","id":"kujo.howl.showcase.render","version":"1.0.0","title":"Render showcase artifacts","description":"Render deterministic SVG, Markdown, or HTML showcase artifacts and a local gallery from a Howl manifest.","input_schema":{"type":"object","properties":{"path":{"type":"string","maxLength":4096,"default":"."},"manifest":{"type":"string","maxLength":4096,"default":"howl.json"},"output_dir":{"type":"string","maxLength":4096,"default":"dist/howl"},"format":{"type":"string","enum":["all","svg","html","markdown"],"default":"all"}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.howl.showcase"},{"kind":"write","resource":"kujo.howl.artifacts"}],"idempotency":{"mode":"keyed"}},
     "tool": {"name":"kujo_howl_render","description":"Render deterministic canonical Howl showcase artifacts. Requires one-time approval."},
     "adapter":"howl_render","source":"howl"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.lens.flow.validate","version":"1.0.0","title":"Validate browser flow","description":"Validate a Lens browser flow's structure and safety constraints without launching a browser.","input_schema":{"type":"object","required":["flow_file"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"flow_file":{"type":"string","minLength":1,"maxLength":4096}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"read","resource":"kujo.lens.flow"}],"idempotency":{"mode":"intrinsic"}},
+    "tool": {"name":"kujo_lens_flow_validate","description":"Validate a canonical Lens browser flow without launching a browser or writing artifacts."},
+    "adapter":"lens_flow_validate","source":"lens"
+  },
+  {
+    "definition": {"schema":"kujo.ability/v1","id":"kujo.lens.page.check","version":"1.0.0","title":"Check rendered page","description":"Open a local or explicitly allowed external page in a real browser and retain deterministic Lens QA evidence.","input_schema":{"type":"object","required":["url"],"properties":{"path":{"type":"string","maxLength":4096,"default":"."},"url":{"type":"string","minLength":1,"maxLength":2048},"output_dir":{"type":"string","maxLength":4096,"default":".lens/runs/command-code"},"quick":{"type":"boolean","default":true},"html":{"type":"boolean","default":true},"allow_external":{"type":"boolean","default":false},"timeout_seconds":{"type":"integer","minimum":5,"maximum":300,"default":30}},"additionalProperties":false},"output_schema":{"type":"object","additionalProperties":true},"effects":[{"kind":"external","resource":"kujo.lens.browser"},{"kind":"write","resource":"kujo.lens.artifacts"}],"idempotency":{"mode":"keyed"}},
+    "tool": {"name":"kujo_lens_check","description":"Run canonical Lens in a real browser and retain QA evidence. External URLs require an explicit flag; execution requires one-time approval."},
+    "adapter":"lens_check","source":"lens"
   }
 ]

@@ -11,6 +11,7 @@ import { readJson, writeJson } from "../lib/io.mjs";
 import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths } from "../lib/paths.mjs";
 import { run } from "../lib/process.mjs";
 import { VERSION } from "../lib/version.mjs";
+import { installLensBrowser, lensBrowserStatus } from "../lib/lens.mjs";
 
 const command = process.argv[2] || "help";
 
@@ -63,6 +64,7 @@ async function status(opts) {
 
 async function doctor(opts) {
   const project = resolve(opts.project || process.cwd());
+  const catalog = await loadCatalog();
   let config = null; let configurationError = "";
   try { ({ config } = await loadProjectConfig(project)); } catch (error) { configurationError = error.message; }
   const checks = [];
@@ -75,12 +77,25 @@ async function doctor(opts) {
   }
   try { const runtime = config?.kujo_bin || process.env.KUJO_BIN || (await import("@kujolang/kujo-runtime")).resolveKujoBinary(); checks.push({ name: "kujo-runtime", ok: await exists(runtime), path: runtime }); } catch (error) { checks.push({ name: "kujo-runtime", ok: false, error: error.message }); }
   checks.push({ name: "command-code", ok: await commandAvailable("command-code") || await commandAvailable("cmd") });
+  if (config && profileAbilities(catalog, config.profile, config.enabled, config.disabled).some((ability) => ability.definition.id === "kujo.lens.page.check")) {
+    const lens = config.sources.lens ? await lensBrowserStatus(config.sources.lens.path) : { ready: false };
+    checks.push({ name: "lens-browser", ok: lens.ready, ...(lens.executable ? { executable: lens.executable } : {}), ...(!lens.ready ? { error: "run 'kujo-cmd browser install'" } : {}) });
+  }
   const ok = checks.every((check) => check.ok);
   output({ ok, message: ok ? "Kujo CMD diagnostics passed." : "Kujo CMD diagnostics found problems.", checks }, opts.json);
   if (!ok) process.exitCode = 1;
 }
 
 async function commandAvailable(name) { const path = (process.env.PATH || "").split(process.platform === "win32" ? ";" : ":"); return (await Promise.all(path.map((part) => exists(join(part, process.platform === "win32" ? `${name}.exe` : name))))).some(Boolean); }
+
+async function browser(opts) {
+  const action = opts._[0] || "status"; if (!["status", "install"].includes(action)) throw new Error("browser action must be status or install");
+  const project = resolve(opts.project || process.cwd()); const { config } = await loadProjectConfig(project); const lens = config.sources.lens;
+  if (!lens) throw new Error("Lens source is not installed");
+  const status = action === "install" ? await installLensBrowser(lens.path) : await lensBrowserStatus(lens.path);
+  output({ ok: status.ready, message: status.ready ? "Lens browser is ready." : "Lens browser is not installed; run 'kujo-cmd browser install'.", browser: "chromium", ready: status.ready, ...(status.executable ? { executable: status.executable } : {}) }, opts.json);
+  if (!status.ready) process.exitCode = 1;
+}
 
 async function profiles(opts) {
   const catalog = await loadCatalog(); const project = resolve(opts.project || process.cwd()); const current = await exists(projectPaths(project).config) ? (await loadProjectConfig(project, catalog)).projectConfig : null;
@@ -176,9 +191,9 @@ async function uninstall(opts) {
   output({ ok: true, message: `Kujo CMD removed from ${project}.${opts.purge ? " Shared local sources and receipts were purged." : " Shared local sources and receipts were preserved."}` }, opts.json);
 }
 
-function help() { process.stdout.write(`Kujo CMD ${VERSION}\n\nUsage: kujo-cmd <command> [options]\n\nCommands:\n  setup       Install every supported Kujo source locally and configure Command Code\n  doctor      Verify runtime, source, configuration, and host readiness\n  status      Show the active local installation\n  profiles    List portable Ability profiles\n  profile ID  Select the active profile\n  abilities   List installed and active Abilities\n  enable ID   Add one Ability to the active exposure\n  disable ID  Hide one Ability from the active exposure\n  approve     Issue a request-bound, one-time approval\n  services    status|start|stop [watchdog]\n  update      Refresh all pinned local sources\n  repair      Restore MCP and skill projections\n  uninstall   Remove project projections; add --purge for shared data\n\nOptions:\n  --project DIR      Target project (default current directory)\n  --profile ID       Setup profile (default kujo.profile.essentials)\n  --source-root DIR  Use local Kujo checkouts (development/offline setup)\n  --force            Reacquire pinned sources\n  --json             Machine-readable output\n`); }
+function help() { process.stdout.write(`Kujo CMD ${VERSION}\n\nUsage: kujo-cmd <command> [options]\n\nCommands:\n  setup       Install every supported Kujo source locally and configure Command Code\n  doctor      Verify runtime, source, configuration, and host readiness\n  status      Show the active local installation\n  profiles    List portable Ability profiles\n  profile ID  Select the active profile\n  abilities   List installed and active Abilities\n  enable ID   Add one Ability to the active exposure\n  disable ID  Hide one Ability from the active exposure\n  approve     Issue a request-bound, one-time approval\n  browser     status|install Lens Chromium dependencies\n  services    status|start|stop [watchdog]\n  update      Refresh all pinned local sources\n  repair      Restore MCP and skill projections\n  uninstall   Remove project projections; add --purge for shared data\n\nOptions:\n  --project DIR      Target project (default current directory)\n  --profile ID       Setup profile (default kujo.profile.essentials)\n  --source-root DIR  Use local Kujo checkouts (development/offline setup)\n  --force            Reacquire pinned sources\n  --json             Machine-readable output\n`); }
 
 try {
   const opts = options(process.argv.slice(3));
-  if (command === "setup") await setup(opts); else if (command === "doctor") await doctor(opts); else if (command === "status") await status(opts); else if (command === "profiles") await profiles(opts); else if (command === "profile") await setProfile(opts); else if (command === "abilities") await abilities(opts); else if (command === "enable") await select(opts, true); else if (command === "disable") await select(opts, false); else if (command === "approve") await approve(opts); else if (command === "services") await services(opts); else if (command === "update") await update(opts); else if (command === "repair") await repair(opts); else if (command === "uninstall") await uninstall(opts); else if (["help", "--help", "-h"].includes(command)) help(); else if (["version", "--version", "-v"].includes(command)) process.stdout.write(`kujo-cmd ${VERSION}\n`); else throw new Error(`unknown command: ${command}`);
+  if (command === "setup") await setup(opts); else if (command === "doctor") await doctor(opts); else if (command === "status") await status(opts); else if (command === "profiles") await profiles(opts); else if (command === "profile") await setProfile(opts); else if (command === "abilities") await abilities(opts); else if (command === "enable") await select(opts, true); else if (command === "disable") await select(opts, false); else if (command === "approve") await approve(opts); else if (command === "browser") await browser(opts); else if (command === "services") await services(opts); else if (command === "update") await update(opts); else if (command === "repair") await repair(opts); else if (command === "uninstall") await uninstall(opts); else if (["help", "--help", "-h"].includes(command)) help(); else if (["version", "--version", "-v"].includes(command)) process.stdout.write(`kujo-cmd ${VERSION}\n`); else throw new Error(`unknown command: ${command}`);
 } catch (error) { process.stderr.write(`error: ${error.message}\n`); process.exitCode = 1; }
