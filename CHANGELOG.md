@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add Lens flow validation and approval-gated real-browser page checks, plus an
+  explicit `kujo-cmd browser install|status` dependency lifecycle and doctor
+  check.
+- Add a scoped browser-review agent with explicit Lens and evidence allowlists.
 - Add offline Tribunal proposal validation and decision review, read-only
   Dossier validation/reporting, and Howl showcase validation/rendering.
 - Add a scoped decision-review agent and extend repository and release agents

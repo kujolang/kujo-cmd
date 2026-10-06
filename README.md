@@ -16,7 +16,8 @@ command-code
 
 No Kujo account or hosted Kujo service is required. The first setup downloads
 the pinned Kujo tools and runtime. After that, normal use is local and works
-offline.
+offline. Lens browser checks additionally require the optional Chromium install
+described below; flow validation does not.
 
 ## What it adds to Command Code
 
@@ -49,6 +50,7 @@ adapter or another npm package.
 | Tribunal | Validate proposals or run deterministic offline decision hearings |
 | Dossier | Validate and report local claim and evidence ledgers |
 | Howl | Validate or render deterministic showcase artifacts and galleries |
+| Lens | Validate browser flows or collect evidence from a real rendered page |
 
 Each call keeps its Ability identity, declared effects, policy decision,
 invocation ID, receipt ID, and any supplied session, run, agent, or model IDs.
@@ -62,9 +64,9 @@ Command Code sees. The default **Essentials** profile exposes five tools.
 | Profile | Tools | Adds |
 |---|---:|---|
 | Essentials | 5 | Catalog, receipts, Scout, PatchBrief, ShipCheck |
-| Review | 17 | ChangeBucket, Fence, Spec, Scent, Concord, VersionSeal, PackWrite, Tribunal, Dossier, Howl checks |
-| Ship | 27 | Eval, RunLedger lifecycle, Redact, offline Tribunal review, Howl rendering, CaseFile, Watchdog telemetry |
-| Full | 36 | Dispatch execution, PackWrite generation, RAG ingest, Muzzle, Kennel, and all installed tools |
+| Review | 18 | ChangeBucket, Fence, Spec, Scent, Concord, VersionSeal, PackWrite, Tribunal, Dossier, Howl, Lens flow checks |
+| Ship | 29 | Eval, RunLedger lifecycle, Redact, offline Tribunal review, Howl rendering, Lens browser QA, CaseFile, Watchdog telemetry |
+| Full | 38 | Dispatch execution, PackWrite generation, RAG ingest, Muzzle, Kennel, and all installed tools |
 
 ```bash
 kujo-cmd profiles
@@ -115,6 +117,8 @@ kujo-cmd doctor --json
 kujo-cmd status
 kujo-cmd repair
 kujo-cmd update
+kujo-cmd browser status             # optional Lens Chromium runtime
+kujo-cmd browser install
 kujo-cmd services start watchdog   # optional; loopback only
 kujo-cmd services status watchdog
 kujo-cmd uninstall                 # keep shared sources and receipts
@@ -122,11 +126,16 @@ kujo-cmd uninstall --purge         # remove shared Kujo CMD data
 ```
 
 Setup writes `.mcp.json`, `.kujo/cmd.json`, and the relevant links under
-`.agents/skills`. It also projects a trust-gated Command Code mod and six
+`.agents/skills`. It also projects a trust-gated Command Code mod and seven
 scoped agents under `.commandcode/`. Their MCP allowlists are explicit and do
 not replace Command Code permission checks or Kujo's request-bound approvals.
 Shared sources and receipts default to
 `~/.local/share/kujo/cmd`. Set `KUJO_CMD_HOME` to move that data root.
+
+`kujo-cmd browser install` installs Lens's exact lockfile dependencies and its
+pinned headless Chromium build into the Lens source/cache locations. It is an
+explicit networked step rather than a hidden setup side effect. When the Ship
+or Full profile exposes browser checks, `kujo-cmd doctor` verifies that runtime.
 
 The projected mod records metadata-only session, subagent, and Kujo tool
 correlation to loopback Watchdog, spooling a bounded queue under
