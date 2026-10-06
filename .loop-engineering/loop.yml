@@ -1,0 +1,43 @@
+objective: "Implement priorities 1-4: an optional Command Code host adapter, coordinated Kujo source repinning, broader high-value Ability coverage, and scoped Kujo-aware Command Code agents."
+checklist_file: ""
+max_iterations: 4
+max_no_progress: 2
+max_consecutive_failures: 3
+
+allowed_actions:
+  - read_files
+  - edit_files
+  - run_tests
+  - commit_local_changes
+
+blocked_actions:
+  - deploy
+  - destructive_cleanup
+  - production_config_change
+  - publish_release
+
+eval_gates:
+  - id: unit_release_tests
+    command: "npm test"
+    required: true
+  - id: package_e2e
+    command: "npm run test:e2e"
+    required: true
+  - id: command_code_host
+    command: "COMMAND_CODE_EXPECTED_VERSION=1.74.3 npm run test:command-code"
+    required: true
+  - id: diff_check
+    command: "git diff --check"
+    required: true
+
+commit:
+  enabled: true
+  strategy: small_meaningful
+  push: true
+
+memory:
+  enabled: true
+  provider: strata
+  project: "Agent Notes"
+  mode: consolidate
+  retrieval_tests: true

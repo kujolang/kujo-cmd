@@ -1,0 +1,15 @@
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.1.4 test:command-code
+> node scripts/check-command-code-host.mjs
+
+{
+  "ok": true,
+  "command_code": "1.74.3",
+  "abilities": 5,
+  "skills": 3,
+  "mcp": "enabled",
+  "mod": "loaded",
+  "agents": 4,
+  "live": null
+}

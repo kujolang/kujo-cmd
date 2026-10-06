@@ -1,0 +1,73 @@
+
+## gate: unit_release_tests
+$ npm test
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.1.4 pretest
+> npm run build
+
+npm warn Unknown env config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.1.4 build
+> node scripts/build-release.mjs
+
+
+> @kujolang/kujo-cmd@0.1.4 test
+> node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs
+
+✔ portable profiles expose a growing catalog without changing installation (12.273219ms)
+✔ ability overrides affect exposure, not the installed source catalog (4.981171ms)
+✔ Watchdog telemetry adapter emits accepted metadata-only canonical v2 (71.861735ms)
+✔ tests/release.test.mjs (1051.087343ms)
+✔ approval, idempotency, receipts, restart, and cancellation fail closed (53.763787ms)
+✔ concurrent keyed approvals execute once across runtime instances (119.398686ms)
+✔ bounded output and sharded idempotency state prevent unbounded hot files (714.060878ms)
+✔ workspace path resolution rejects intermediate symbolic-link escapes (15.20751ms)
+✔ skill cleanup rejects a forged traversal manifest before deletion (10.912043ms)
+✔ Command Code asset cleanup rejects an unowned manifest entry (4.537855ms)
+✔ project configuration cannot override trusted executable or source locations (63.28991ms)
+✔ purge guard rejects roots that contain the user home or working directory (0.901135ms)
+✔ setup, profiles, repair, and uninstall preserve unrelated host config (1344.367513ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1571.489726
+gate unit_release_tests: pass
+
+## gate: package_e2e
+$ npm run test:e2e
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.1.4 test:e2e
+> node tests/e2e.test.mjs
+
+Command Code local package compatibility: setup, discovery, schema metadata, canonical invocation, approvals, receipts, concurrency, and restart passed
+gate package_e2e: pass
+
+## gate: command_code_host
+$ COMMAND_CODE_EXPECTED_VERSION=1.74.3 npm run test:command-code
+npm warn Unknown user config "python". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @kujolang/kujo-cmd@0.1.4 test:command-code
+> node scripts/check-command-code-host.mjs
+
+{
+  "ok": true,
+  "command_code": "1.74.3",
+  "abilities": 5,
+  "skills": 3,
+  "mcp": "enabled",
+  "mod": "loaded",
+  "agents": 4,
+  "live": null
+}
+gate command_code_host: pass
+
+## gate: diff_check
+$ git diff --check
+gate diff_check: pass
