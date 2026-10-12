@@ -9,7 +9,7 @@
     {"id":"shipcheck","repo":"kujolang/shipcheck","commit":"0a9f5795e9498f3698d5da6bb66642544251dd37"},
     {"id":"dispatch","repo":"kujolang/dispatch","commit":"e1bbc21166022b00fb21ed000cc4f3cbb26e7e07"},
     {"id":"runledger","repo":"kujolang/runledger","commit":"334ddd4d33c8cb2612c8edab971ee69170824133"},
-    {"id":"watchdog","repo":"kujolang/watchdog","commit":"a842217c794d9115f54863d69cffffae2485f663"},
+    {"id":"watchdog","repo":"kujolang/watchdog","commit":"9e82e8f5b05edca948f6a432ae517031388296e6"},
     {"id":"rag","repo":"kujolang/rag","commit":"85743f88c152d7c65f59d4697111faf85e36d8eb"},
     {"id":"fence","repo":"kujolang/fence","commit":"fda049ed9aa55ba50c150b84bb9ca1bdf49af0dc"},
     {"id":"spec","repo":"kujolang/spec","commit":"1211f37a09314be7150734bf15a55e9b2ea6504d"},
