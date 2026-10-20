@@ -117,7 +117,7 @@ result names the tools exercised and explicitly reports browser skips.
 After `cmd login`, run the optional real-session test with an available model:
 
 ```sh
-COMMAND_CODE_EXPECTED_VERSION=1.85.0 KUJO_CMD_LIVE_MODEL=ollama/glm-5.3:cloud npm run test:command-code
+KUJO_CMD_LIVE_MODEL=<available-model-id> npm run test:command-code
 ```
 
 This loads the packaged mod into the actual host, calls the catalog through
@@ -134,3 +134,26 @@ and checks verified for this change.
 Sources checked 2026-10-20:
 [Mod packaging and listing](https://commandcode.ai/docs/mods#packaging-and-install),
 [registry schema](https://github.com/CommandCodeAI/command-code/blob/main/mods/registry.schema.json).
+
+### Independent live provider check
+
+When host authentication prevents a Command Code session, a local
+OpenAI-compatible proxy (for example Hermes/Nous) can separately verify the
+model-to-MCP path:
+
+```sh
+KUJO_CMD_PROVIDER_URL=http://127.0.0.1:8645/v1 \
+KUJO_CMD_PROVIDER_MODEL=<available-tool-capable-model> npm run test:provider
+```
+
+The check uses a disposable project and Kujo data root, discovers real MCP
+schemas, asks the model to generate one call each to catalog, PatchBrief and
+ShipCheck, checks successful receipts, and asks the model to consume each
+result. Only these read-only tools are exposed. Set `KUJO_SOURCE_ROOT` to
+pinned source checkouts; otherwise setup acquires the pinned catalog.
+`KUJO_CMD_PROVIDER_TOKEN` optionally supplies the local proxy bearer; the
+Hermes default is a non-secret placeholder. Credentials remain in the proxy.
+Only loopback proxy URLs are accepted. The proxy may forward inference to a
+cloud provider; this is not an offline model test. Provider access and quota
+are required. This check does not certify Command Code authentication,
+interactive slash commands, or session mod loading.

@@ -70,5 +70,21 @@ Ollama has been removed from this machine and is no longer a test option.
 Desktop behavior and other operating systems require their own host checks;
 the CI package suite covers Linux, macOS, and Windows on Node 20 and 22.
 
+### Hermes provider fallback
+
+After repeating ChatGPT login, the minimal Command Code check still returned
+exit code 3 before model execution. Separately, `npm run test:provider` passed
+through the existing Hermes/Nous loopback proxy at port 8645 using
+`poolside/laguna-s-2.1:free`. The model generated and consumed successful calls
+to the actual Kujo catalog, PatchBrief and ShipCheck MCP tools, with receipts,
+in a disposable fixture against the pinned sources. Five tools were discovered.
+An initial attempt with `stepfun/step-3.7-flash:free` returned provider HTTP 429;
+no pass is claimed for that model.
+
+This proves a live provider-to-MCP path without Ollama. Hermes forwards model
+inference to its upstream provider; it is not an offline/local-model test.
+It does not replace the remaining Command Code session-loader and interactive
+checks described above. Existing AI Chat/provider settings were not modified.
+
 This document prepares the submission; it does not claim that the directory
 PR has been opened, accepted, or that version 0.3.0 has been published to npm.
