@@ -2,6 +2,11 @@
 
 ## 0.3.0 - Unreleased
 
+- Fix Lens readiness detection for Playwright headless-shell-only installs by
+  verifying a headless launch instead of checking the headed browser path.
+- Report browser skips and all four profile inventories in the real-tool suite;
+  add an opt-in required-browser gate and real-session mod registration evidence.
+
 - Make the existing package discoverable through `commandcode.mods` and the
   `cmd-mod` keywords; include GitHub directory submission materials.
 - Add native `/kujo` help, setup instructions, and active-session MCP status.

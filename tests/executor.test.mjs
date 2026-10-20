@@ -27,12 +27,12 @@ test("Watchdog telemetry adapter emits accepted metadata-only canonical v2", asy
   }
 });
 
-test("Lens browser status requires both the bridge dependency and browser executable", async () => {
+test("Lens browser status requires the bridge dependency and a successful headless launch", async () => {
   const root = await mkdtemp(join(tmpdir(), "kujo-cmd-lens-")); const bridge = join(root, "bridge"); const moduleRoot = join(bridge, "node_modules", "playwright-core"); const executable = join(root, "chromium");
   await mkdir(moduleRoot, { recursive: true });
   assert.equal((await lensBrowserStatus(root)).ready, false);
   await writeFile(executable, "fixture");
-  await writeFile(join(moduleRoot, "index.js"), `module.exports={chromium:{executablePath(){return ${JSON.stringify(executable)}}}};\n`);
+  await writeFile(join(moduleRoot, "index.js"), `module.exports={chromium:{async launch(options){if(options.headless!==true || !require("node:fs").existsSync(${JSON.stringify(executable)}))throw new Error("browser unavailable");return {async close(){}}},executablePath(){return ${JSON.stringify(executable)}}}};\n`);
   const status = await lensBrowserStatus(root); assert.equal(status.ready, true); assert.equal(status.executable, executable);
   const adapter = handlers({ config: { kujo_bin: process.execPath, sources: { lens: { path: root } } }, project: root, runtime: null }).lens_check;
   await assert.rejects(() => adapter({ path: ".", url: "https://example.com", output_dir: ".lens/test" }, {}), { code: "ability_url_forbidden" });
@@ -41,7 +41,20 @@ test("Lens browser status requires both the bridge dependency and browser execut
 test("Lens browser installer uses the locked bridge lifecycle and verifies Chromium", async () => {
   const root = await mkdtemp(join(tmpdir(), "kujo-cmd-lens-install-")); const bridge = join(root, "bridge"); const fakeNpm = join(root, "npm-fixture"); const executable = join(root, "chromium");
   await mkdir(bridge, { recursive: true }); await writeFile(join(bridge, "package-lock.json"), "{}\n");
-  await writeFile(fakeNpm, `#!/usr/bin/env node\nconst fs=require('node:fs');const path=require('node:path');const root=process.cwd();const moduleRoot=path.join(root,'node_modules','playwright-core');fs.mkdirSync(moduleRoot,{recursive:true});fs.writeFileSync(${JSON.stringify(executable)},'fixture');fs.writeFileSync(path.join(moduleRoot,'index.js'),${JSON.stringify(`module.exports={chromium:{executablePath(){return ${JSON.stringify(executable)}}}};\n`)});\n`);
+  await writeFile(fakeNpm, `#!/usr/bin/env node\nconst fs=require('node:fs');const path=require('node:path');const root=process.cwd();const moduleRoot=path.join(root,'node_modules','playwright-core');fs.mkdirSync(moduleRoot,{recursive:true});fs.writeFileSync(${JSON.stringify(executable)},'fixture');fs.writeFileSync(path.join(moduleRoot,'index.js'),${JSON.stringify(`module.exports={chromium:{async launch(options){if(options.headless!==true || !require("node:fs").existsSync(${JSON.stringify(executable)}))throw new Error("browser unavailable");return {async close(){}}},executablePath(){return ${JSON.stringify(executable)}}}};\n`)});\n`);
   await chmod(fakeNpm, 0o755);
   const status = await installLensBrowser(root, { npmCommand: fakeNpm }); assert.equal(status.ready, true); assert.equal(status.executable, executable);
+});
+
+
+test("Lens accepts a headless-shell-only install but rejects a browser that cannot launch", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-headless-"));
+  const moduleRoot = join(root, "bridge", "node_modules", "playwright-core");
+  await mkdir(moduleRoot, { recursive: true });
+  await writeFile(join(moduleRoot, "index.js"), `module.exports={chromium:{async launch(options){if(options.headless!==true)throw new Error('headed unavailable');return {async close(){}}},executablePath(){return ${JSON.stringify(join(root, "missing-headed-browser"))}}}};`);
+  const status = await lensBrowserStatus(root);
+  assert.equal(status.ready, true);
+  assert.equal(status.executable, undefined);
+  await writeFile(join(moduleRoot, "index.js"), "module.exports={chromium:{async launch(){throw new Error('missing system dependency')}}};");
+  assert.equal((await lensBrowserStatus(root)).ready, false);
 });
