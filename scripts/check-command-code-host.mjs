@@ -13,6 +13,9 @@ const exec = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(root, "bin", "kujo-cmd.mjs");
 const commandCode = process.env.COMMAND_CODE_BIN || "command-code";
+// Opt-in workaround for the 1.85.1 CLI's key-presence preflight in local-only mode.
+// The placeholder is not a credential; local-only refuses all backend routes.
+const localOnly = process.env.KUJO_CMD_LOCAL_ONLY === "1";
 const temporary = await mkdtemp(join(tmpdir(), "kujo-cmd-command-code-"));
 
 try {
@@ -34,6 +37,10 @@ try {
   const sourceRoot = process.env.KUJO_SOURCE_ROOT || (await localSourcesAvailable(candidateSourceRoot, catalog) ? candidateSourceRoot : null);
   const setupArgs = [cli, "setup", "--project", project, ...(sourceRoot ? ["--source-root", sourceRoot] : []), "--json"];
   const env = { ...process.env, KUJO_CMD_HOME: home, KUJO_BIN: resolveKujoBinary() };
+  if (localOnly) {
+    env.CMD_LOCAL_ONLY = "1";
+    env.COMMAND_CODE_API_KEY = "local-only-placeholder";
+  }
   const setup = JSON.parse((await exec(process.execPath, setupArgs, { cwd: root, env, timeout: 300_000 })).stdout);
   assert.equal(setup.ok, true);
   assert.equal(setup.abilities, 5);
@@ -108,6 +115,7 @@ export default function(cmd) {
       "-p",
       "Call the Kujo MCP tool named kujo_ability_catalog exactly once. Do not call any other tool. Then reply with only the count of returned abilities.",
       "--model", process.env.KUJO_CMD_LIVE_MODEL,
+      ...(localOnly ? ["--local-only"] : []),
       "--mod", installedPackage,
       "--mod", probePath,
       "--max-turns", "3",
@@ -124,9 +132,9 @@ export default function(cmd) {
     const calls = events.filter((event) => event.event?.type === "tool_completed" && event.event.toolName === "mcp__kujo__kujo_ability_catalog");
     assert.equal(calls.length, 1);
     const sessionEvidence = JSON.parse(await readFile(evidencePath, "utf8"));
-    assert.ok(sessionEvidence.commands.some((command) => command.name === "kujo"), "real host did not register /kujo");
+    assert.equal(sessionEvidence.commands.filter((command) => command.name === "kujo").length, 1, "real host must register exactly one /kujo command");
     assert.ok(sessionEvidence.tools.includes("mcp__kujo__kujo_ability_catalog"), "real host did not activate the Kujo MCP catalog");
-    live = { session_mod_registered: true, model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
+    live = { session_mod_registered: true, local_only: localOnly, local_key_placeholder: localOnly, model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
   }
 
   process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "factory-tested", packed_mod: "installed-and-migrated", interactive_session: "not-tested", agents: 7, live }, null, 2)}\n`);
