@@ -1,6 +1,6 @@
 {
   "name": "@kujolang/kujo-cmd",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Local-first Kujo Ability and Agent Skills integration for Command Code.",
   "type": "module",
   "bin": {
@@ -16,13 +16,14 @@
     "README.md",
     "LICENSE",
     "SECURITY.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "docs/"
   ],
   "scripts": {
     "build": "node scripts/build-release.mjs",
     "prepack": "npm run build",
     "pretest": "npm run build",
-    "test": "node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs",
+    "test": "node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs tests/mod.test.mjs",
     "test:e2e": "node tests/e2e.test.mjs",
     "test:command-code": "node scripts/check-command-code-host.mjs"
   },
@@ -49,6 +50,17 @@
     "command-code",
     "mcp",
     "agent-skills",
-    "ability"
-  ]
+    "ability",
+    "cmd-mod",
+    "cmd-mod-hook",
+    "cmd-mod-command"
+  ],
+  "commandcode": {
+    "mods": [
+      "./assets/command-code/mods/kujo-command-bridge.ts"
+    ]
+  },
+  "devDependencies": {
+    "jiti": "2.6.1"
+  }
 }

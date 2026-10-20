@@ -1,0 +1,116 @@
+# Command Code mods directory
+
+Kujo CMD is both a native Command Code mod and a local MCP integration. The
+mod adds `/kujo` help/setup/status and lifecycle hooks. The existing MCP server
+supplies the Ability tools, request-bound approvals, and receipts. Installing
+only the mod does not configure MCP or download the Kujo tool sources.
+
+## Install from GitHub
+
+From the project you want to use with Kujo:
+
+```sh
+cmd mods add kujolang/kujo-cmd
+```
+
+For a reproducible installation, append `@<commit-or-tag>` to that source.
+Start Command Code, trust the project, and use `/kujo` or `/kujo status`.
+The bridge is listed as `kujo-command-bridge` by `cmd mods list`.
+
+Configure the tools using the CLI shipped in the installed package. Run
+`/kujo setup` inside Command Code: it prints the exact command for that package.
+Run that command in your project terminal; its form is:
+
+```sh
+node /absolute/path/to/installed/kujo-cmd/bin/kujo-cmd.mjs setup --mod-mode package
+```
+
+This uses the same version as the installed mod without requiring an npm
+release. Node 20+, Git, and the platform's optional Kujo runtime dependency are
+required. Setup downloads pinned sources on first use, writes `.mcp.json`,
+links the active skills, and projects seven scoped agents. Restart Command Code
+after setup. Run `/kujo status` and ask it to call `kujo_ability_catalog` to
+verify tool discovery. `kujo-cmd doctor` provides fuller local diagnostics.
+
+## Install from npm after 0.3.0 is published
+
+```sh
+cmd mods add @kujolang/kujo-cmd@0.3.0
+npx @kujolang/kujo-cmd@0.3.0 setup --mod-mode package
+```
+
+Do not use an older npm version: it has no mod manifest. The `/kujo setup`
+command prints the installed CLI’s exact path; it does not run installation, modify the project,
+spend model tokens, or grant approvals. There is no postinstall script.
+Command Code installs mod packages with npm lifecycle scripts disabled.
+
+## Existing Kujo CMD users
+
+Install the package through `cmd mods add`, then run its setup with
+`--mod-mode package`. Setup removes its owned project bridge while retaining
+the agents, selected profile, and Ability overrides. It refuses an unowned
+bridge with the same filename; move or remove that file yourself first.
+`repair`, `update`, and subsequent `setup` calls retain package mode.
+
+Without this option, the existing standalone `kujo-cmd setup` flow continues
+to project a bridge. Both copies use the same name, so the host shadows a
+collision, but migrate rather than relying on a potentially stale copy.
+
+The mod can also be installed globally with `cmd mods add -g`. Configure MCP
+separately in each project using package mode. Project mods require workspace
+trust; global mods load for every project. `/kujo status` uses the host's
+workspace, not the process's initial working directory.
+
+To remove the entire integration, run `kujo-cmd uninstall` in the project,
+then `cmd mods remove kujolang/kujo-cmd` (or the npm source you installed).
+Removing the mod alone leaves the independently configured MCP tools, skills,
+and agents. Uninstall preserves shared sources and receipts unless `--purge`
+is explicitly requested. Do not purge shared data still used by other projects.
+
+## Behavior and boundaries
+
+- Hooks record metadata-only session, subagent, and Kujo tool events to local
+  Watchdog, with bounded on-disk spooling while it is unavailable.
+- A failed Kujo MCP call permits one continuation per run. `KUJO_CMD_JIDOKA=0`
+  disables it; it does not approve or automatically retry a mutating Ability.
+- RunLedger start/finish recording remains opt-in with `KUJO_CMD_RUNLEDGER=1`.
+- The mod registers commands and hooks, not duplicate native Ability tools.
+  MCP policy, effect declarations, and human approval requirements remain intact.
+- Canonical skills are selected and installed by setup, not falsely declared as
+  bundled `commandcode.skills` entries.
+- The ModApi is experimental. Recheck host compatibility before each release.
+  CLI verification is not proof of Desktop end-to-end compatibility.
+
+## Submit to the directory
+
+The prepared entry in `docs/mods-registry-entry.json` uses the GitHub source,
+so it can be submitted once this change is available on the repository's main
+branch. It intentionally omits `npm` until the mod-capable release is published.
+Open a PR adding that object to the `mods` array in
+[CommandCodeAI/command-code/mods/registry.json](https://github.com/CommandCodeAI/command-code/blob/main/mods/registry.json).
+Keep all existing entries. Maintainers review submissions; a package keyword
+or npm publication alone does not create a listing.
+
+If using npm instead, set both `source` and `npm` to `@kujolang/kujo-cmd`
+after verifying the published package contains the mod entrypoint. The correct
+kinds are `command` and `hook`: the mod's tools come through separate MCP setup.
+A submission description is provided in `docs/mods-submission.md`.
+
+## Verification
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm run test:command-code
+```
+
+The host check uses a disposable project and Kujo data root. The optional
+`KUJO_CMD_LIVE_MODEL` check makes a model call; omit it for local checks.
+The pack test validates the published file list and manifest. Mod tests load
+the TypeScript factory and exercise onboarding, status, stop hooks, and
+projection migration. See the submission notes for the actual host versions
+and checks verified for this change.
+
+Sources checked 2026-10-20:
+[Mod packaging and listing](https://commandcode.ai/docs/mods#packaging-and-install),
+[registry schema](https://github.com/CommandCodeAI/command-code/blob/main/mods/registry.schema.json).

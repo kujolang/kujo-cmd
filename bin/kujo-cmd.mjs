@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
 import { createApp, loadProjectConfig } from "../lib/app.mjs";
 import { loadCatalog, profileAbilities } from "../lib/catalog.mjs";
-import { configureMcp, installProjection, installSources, projectCommandCodeAssets, projectSkills, removeCommandCodeAssets, removeMcp, removeProjectedSkills } from "../lib/install.mjs";
+import { checkCommandCodeAssets, configureMcp, installProjection, installSources, projectCommandCodeAssets, projectSkills, removeCommandCodeAssets, removeMcp, removeProjectedSkills } from "../lib/install.mjs";
 import { loadInstallation, writeInstallation } from "../lib/installation.mjs";
 import { readJson, writeJson } from "../lib/io.mjs";
 import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths } from "../lib/paths.mjs";
@@ -37,21 +37,25 @@ async function exists(path) { try { await access(path); return true; } catch { r
 
 async function setup(opts) {
   const catalog = await loadCatalog(); const project = resolve(opts.project || process.cwd());
-  const profile = opts.profile || "kujo.profile.essentials";
-  profileAbilities(catalog, profile);
-  if (opts["dry-run"]) return output({ ok: true, message: "Kujo CMD setup validated (dry run).", project, profile, source_count: catalog.sources.length }, opts.json);
+  const previous = await readJson(projectPaths(project).config, null);
+  const profile = opts.profile || previous?.profile || "kujo.profile.essentials";
+  const modMode = opts["mod-mode"] || previous?.mod_mode || "projected";
+  if (!["projected", "package"].includes(modMode)) throw new Error("--mod-mode must be projected or package");
+  profileAbilities(catalog, profile, previous?.enabled, previous?.disabled);
+  await checkCommandCodeAssets(project, modMode);
+  if (opts["dry-run"]) return output({ ok: true, message: "Kujo CMD setup validated (dry run).", project, profile, mod_mode: modMode, source_count: catalog.sources.length }, opts.json);
   const sources = await installSources(catalog, { sourceRoot: opts["source-root"], force: opts.force });
   const kujoBin = process.env.KUJO_BIN || (await import("@kujolang/kujo-runtime")).resolveKujoBinary();
   const projection = await installProjection(VERSION, kujoBin);
   const installedAt = new Date().toISOString();
   const installation = await writeInstallation({ version: VERSION, sources, projection_root: projection.root, kujo_bin: projection.kujo, installed_at: installedAt });
-  const paths = projectPaths(project); const config = { schema: "kujo.cmd.config/v1", version: VERSION, installation_version: VERSION, profile, enabled: [], disabled: [], installed_at: installedAt };
+  const paths = projectPaths(project); const config = { schema: "kujo.cmd.config/v1", version: VERSION, installation_version: VERSION, profile, mod_mode: modMode, enabled: previous?.enabled || [], disabled: previous?.disabled || [], installed_at: installedAt };
   await writeJson(paths.config, config);
   const trustedConfig = { ...config, ...installation };
-  const skills = await projectSkills(catalog, trustedConfig, project); const hostAssets = await projectCommandCodeAssets(project); const mcp = await configureMcp(trustedConfig, project);
+  const skills = await projectSkills(catalog, trustedConfig, project); const hostAssets = await projectCommandCodeAssets(project, modMode); const mcp = await configureMcp(trustedConfig, project);
   const app = await createApp(project); const smoke = await app.runtime.execute({ abilityId: "kujo.ability.catalog.list", input: {}, controls: { host: "command-code", surface: "mcp", invocationId: `setup-${Date.now()}` } });
   if (!smoke.ok) throw new Error("local Ability smoke test failed");
-  return output({ ok: true, message: "Kujo is ready in Command Code.", project, profile, abilities: app.runtime.describe().length, skills: skills.length, host_assets: hostAssets.length, mcp, execution: "local-stdio", hosted_service_required: false }, opts.json);
+  return output({ ok: true, message: "Kujo is ready in Command Code.", project, profile, mod_mode: modMode, abilities: app.runtime.describe().length, skills: skills.length, host_assets: hostAssets.length, mcp, execution: "local-stdio", hosted_service_required: false }, opts.json);
 }
 
 async function status(opts) {
@@ -59,7 +63,7 @@ async function status(opts) {
   if (!await exists(paths.config)) return output({ ok: false, message: "Kujo CMD is not configured in this project.", project }, opts.json);
   const { config } = await loadProjectConfig(project);
   const app = await createApp(project);
-  return output({ ok: true, message: "Kujo CMD is configured.", version: config.version, profile: config.profile, abilities: app.runtime.describe().length, sources: Object.keys(config.sources).length, mcp_configured: await exists(paths.mcp), receipts: homePaths().receipts }, opts.json);
+  return output({ ok: true, message: "Kujo CMD is configured.", version: config.version, profile: config.profile, mod_mode: config.mod_mode || "projected", abilities: app.runtime.describe().length, sources: Object.keys(config.sources).length, mcp_configured: await exists(paths.mcp), receipts: homePaths().receipts }, opts.json);
 }
 
 async function doctor(opts) {
@@ -162,7 +166,7 @@ async function watchdogProcessMatches(current) {
   return outcome.exitCode === 0 && outcome.stdout.includes(current.script);
 }
 
-async function repair(opts) { const project = resolve(opts.project || process.cwd()); const catalog = await loadCatalog(); const { config } = await loadProjectConfig(project, catalog); const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project); const mcp = await configureMcp(config, project); output({ ok: true, message: "Kujo CMD projections repaired.", skills, host_assets: hostAssets, mcp }, opts.json); }
+async function repair(opts) { const project = resolve(opts.project || process.cwd()); const catalog = await loadCatalog(); const { config } = await loadProjectConfig(project, catalog); const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project, config.mod_mode); const mcp = await configureMcp(config, project); output({ ok: true, message: "Kujo CMD projections repaired.", skills, host_assets: hostAssets, mcp }, opts.json); }
 
 async function update(opts) {
   const catalog = await loadCatalog();
@@ -179,7 +183,7 @@ async function update(opts) {
   const nextInstallation = await writeInstallation({ version: VERSION, sources, projection_root: projection.root, kujo_bin: projection.kujo, installed_at: installation.installed_at, updated_at: updatedAt });
   const nextProject = { ...projectConfig, version: VERSION, installation_version: VERSION, updated_at: updatedAt }; await writeJson(paths.config, nextProject);
   const config = { ...nextProject, ...nextInstallation };
-  const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project); const mcp = await configureMcp(config, project);
+  const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project, config.mod_mode); const mcp = await configureMcp(config, project);
   output({ ok: true, message: "Kujo CMD updated without changing profile exposure.", profile: config.profile, enabled: config.enabled, disabled: config.disabled, skills, host_assets: hostAssets, mcp }, opts.json);
 }
 
@@ -191,7 +195,7 @@ async function uninstall(opts) {
   output({ ok: true, message: `Kujo CMD removed from ${project}.${opts.purge ? " Shared local sources and receipts were purged." : " Shared local sources and receipts were preserved."}` }, opts.json);
 }
 
-function help() { process.stdout.write(`Kujo CMD ${VERSION}\n\nUsage: kujo-cmd <command> [options]\n\nCommands:\n  setup       Install every supported Kujo source locally and configure Command Code\n  doctor      Verify runtime, source, configuration, and host readiness\n  status      Show the active local installation\n  profiles    List portable Ability profiles\n  profile ID  Select the active profile\n  abilities   List installed and active Abilities\n  enable ID   Add one Ability to the active exposure\n  disable ID  Hide one Ability from the active exposure\n  approve     Issue a request-bound, one-time approval\n  browser     status|install Lens Chromium dependencies\n  services    status|start|stop [watchdog]\n  update      Refresh all pinned local sources\n  repair      Restore MCP and skill projections\n  uninstall   Remove project projections; add --purge for shared data\n\nOptions:\n  --project DIR      Target project (default current directory)\n  --profile ID       Setup profile (default kujo.profile.essentials)\n  --source-root DIR  Use local Kujo checkouts (development/offline setup)\n  --force            Reacquire pinned sources\n  --json             Machine-readable output\n`); }
+function help() { process.stdout.write(`Kujo CMD ${VERSION}\n\nUsage: kujo-cmd <command> [options]\n\nCommands:\n  setup       Install every supported Kujo source locally and configure Command Code\n  doctor      Verify runtime, source, configuration, and host readiness\n  status      Show the active local installation\n  profiles    List portable Ability profiles\n  profile ID  Select the active profile\n  abilities   List installed and active Abilities\n  enable ID   Add one Ability to the active exposure\n  disable ID  Hide one Ability from the active exposure\n  approve     Issue a request-bound, one-time approval\n  browser     status|install Lens Chromium dependencies\n  services    status|start|stop [watchdog]\n  update      Refresh all pinned local sources\n  repair      Restore MCP and skill projections\n  uninstall   Remove project projections; add --purge for shared data\n\nOptions:\n  --project DIR      Target project (default current directory)\n  --mod-mode MODE    projected (default) or package (cmd mods add owns the bridge)\n  --profile ID       Setup profile (default kujo.profile.essentials)\n  --source-root DIR  Use local Kujo checkouts (development/offline setup)\n  --force            Reacquire pinned sources\n  --json             Machine-readable output\n`); }
 
 try {
   const opts = options(process.argv.slice(3));

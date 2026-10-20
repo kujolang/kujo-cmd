@@ -2,7 +2,8 @@ import type {ModApi} from '@commandcode/harness';
 import {createHash, randomUUID} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {homedir} from 'node:os';
-import {join, resolve} from 'node:path';
+import {dirname, join, resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {mkdir, readFile, readdir, rename, unlink, writeFile} from 'node:fs/promises';
 import {promisify} from 'node:util';
 
@@ -10,7 +11,8 @@ const execute = promisify(execFile);
 const watchdogUrl = process.env.KUJO_CMD_WATCHDOG_URL || 'http://127.0.0.1:7700';
 const runLedgerEnabled = process.env.KUJO_CMD_RUNLEDGER === '1';
 const jidokaEnabled = process.env.KUJO_CMD_JIDOKA !== '0';
-const spoolRoot = resolve('.kujo', 'watchdog-spool');
+// Kept in sync with package.json by the release test; this file also runs as a standalone projection.
+const packageVersion = '0.3.0';
 
 function hash(value: string, length: number): string {
 	return createHash('sha256').update(value).digest('hex').slice(0, length);
@@ -24,7 +26,7 @@ function endpoint(): URL {
 	return url;
 }
 
-async function spool(batch: object): Promise<void> {
+async function spool(spoolRoot: string, batch: object): Promise<void> {
 	await mkdir(spoolRoot, {recursive: true, mode: 0o700});
 	const finalPath = join(spoolRoot, `${Date.now()}-${randomUUID()}.json`);
 	const temporary = `${finalPath}.tmp`;
@@ -48,7 +50,7 @@ async function deliver(url: URL, batch: object): Promise<{ok: boolean; retryable
 	}
 }
 
-async function submit(batch: object): Promise<void> {
+async function submit(spoolRoot: string, batch: object): Promise<void> {
 	let url: URL;
 	try { url = endpoint(); } catch { return; }
 	await mkdir(spoolRoot, {recursive: true, mode: 0o700});
@@ -61,7 +63,7 @@ async function submit(batch: object): Promise<void> {
 		else break;
 	}
 	const result = await deliver(url, batch);
-	if (!result.ok && result.retryable) await spool(batch).catch(() => undefined);
+	if (!result.ok && result.retryable) await spool(spoolRoot, batch).catch(() => undefined);
 }
 
 type RunState = {
@@ -79,16 +81,58 @@ function installationPath(): string {
 	return join(dataRoot, 'installation.json');
 }
 
-async function runLedgerCommand(args: string[]): Promise<string> {
+async function runLedgerCommand(project: string, args: string[]): Promise<string> {
 	const installation = JSON.parse(await readFile(installationPath(), 'utf8'));
 	const binary = installation.kujo_bin;
 	const source = installation.sources?.runledger?.path;
 	if (typeof binary !== 'string' || typeof source !== 'string') throw new Error('trusted Kujo CMD RunLedger installation is unavailable');
-	const result = await execute(binary, ['run', join(source, 'runledger.kujo'), '--interpreter', '--', ...args], {cwd: process.cwd(), timeout: 30000, maxBuffer: 1024 * 1024});
+	const result = await execute(binary, ['run', join(source, 'runledger.kujo'), '--interpreter', '--', ...args], {cwd: project, timeout: 30000, maxBuffer: 1024 * 1024});
 	return result.stdout;
 }
 
 export default function (cmd: ModApi): void {
+	const project = resolve(cmd.cwd);
+	const spoolRoot = join(project, '.kujo', 'watchdog-spool');
+	const setupGuide = async () => {
+		// A package entry runs in assets/command-code/mods; the legacy copied file
+		// has no package there. Never execute a path obtained from project config.
+		const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+		let packaged = false;
+		try { packaged = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).name === '@kujolang/kujo-cmd'; } catch {}
+		const cli = join(root, 'bin', 'kujo-cmd.mjs');
+		const quotedCli = process.platform === 'win32' ? `"${cli}"` : `'${cli.replace(/'/g, "'\\''")}'`;
+		return [
+			'Run in your project terminal:',
+			packaged ? `node ${quotedCli} setup --mod-mode package` : `npx @kujolang/kujo-cmd@${packageVersion} setup`,
+			'Setup downloads pinned Kujo sources and writes project MCP, skills, and agent configuration. Restart Command Code afterward.',
+			packaged ? 'The installed mod package supplies this CLI; no separate npm release is required.' : 'To migrate to a directory install, first run cmd mods add kujolang/kujo-cmd, then use that package’s CLI with setup --mod-mode package.',
+		].join('\n');
+	};
+	cmd.addCommand({
+		name: 'kujo',
+		description: 'Kujo setup instructions and current-session MCP status',
+		argumentHint: '[help|setup|status]',
+		handler: async ({args}) => {
+			const action = args.trim() || 'help';
+			if (action === 'setup') return {message: await setupGuide()};
+			if (action !== 'status') return {message: `${action === 'help' ? '' : 'Unknown Kujo command.\n'}/kujo setup — installation instructions\n/kujo status — project configuration and tools visible in this session\nNo setup or model call runs automatically.`};
+			try {
+				const config = JSON.parse(await readFile(join(project, '.kujo', 'cmd.json'), 'utf8'));
+				if (config.schema !== 'kujo.cmd.config/v1' || typeof config.profile !== 'string') throw new Error('Invalid Kujo project configuration; run kujo-cmd doctor.');
+				const tools = cmd.getActiveTools().filter(name => name.startsWith('mcp__kujo__'));
+				return {message: [
+					`Kujo CMD · ${project}`,
+					`Configured version: ${config.version}; profile: ${config.profile}; mod mode: ${config.mod_mode || 'projected'}`,
+					`Active Kujo MCP tools in this session: ${tools.length}`,
+					tools.length ? tools.join(', ') : 'Tools are not active. Restart after setup or profile changes; check MCP permissions and plan mode.',
+					'This is a session status check, not a runtime health check. Run kujo-cmd doctor for diagnostics.',
+				].join('\n')};
+			} catch (error) {
+				if ((error as NodeJS.ErrnoException).code === 'ENOENT') return {message: `Kujo tools are not configured for ${project}. The mod is loaded.\n${await setupGuide()}`};
+				return {message: `Cannot read Kujo project configuration: ${(error as Error).message}`};
+			}
+		},
+	});
 	let current: RunState | null = null;
 	let queue = Promise.resolve();
 
@@ -104,12 +148,12 @@ export default function (cmd: ModApi): void {
 			producer: {name: 'kujo-cmd-command-code', version: '1.0.0', adapter_id: 'kujo.cmd.command-code.mod', adapter_version: '1.0.0', original_schema: 'command-code.agent-event'},
 			records: [{record_id: recordId, record_type: 'event', trace_id: current.traceId, observed_at: now, kind: name.includes('tool') ? 'tool' : name.includes('agent') ? 'agent' : 'workflow', name, status, source: {'watchdog.semantic_profile': 'watchdog.observability.v1', 'application.name': 'kujo-cmd', 'harness.name': 'command-code', 'instrumentation.name': 'kujo.cmd.command-code.mod', 'instrumentation.version': '1.0.0'}, references: refs, attributes: {...attributes, 'watchdog.outcome.code': outcome, 'watchdog.outcome.terminal': true}, content: [], privacy: {content_mode: 'off', policy_version: 'watchdog.privacy.v1', transformations: ['metadata_only']}}],
 		};
-		enqueue(() => submit(batch));
+		enqueue(() => submit(spoolRoot, batch));
 	};
 
 	const startLedger = async () => {
 		if (!current || current.runLedgerId || !runLedgerEnabled) return;
-		const output = await runLedgerCommand(['start', '--provider', 'command-code', '--model', current.model || 'unknown', '--task', `Command Code session ${current.sessionId}`, '--repo', process.cwd()]);
+		const output = await runLedgerCommand(project, ['start', '--provider', 'command-code', '--model', current.model || 'unknown', '--task', `Command Code session ${current.sessionId}`, '--repo', project]);
 		const match = output.match(/Started run:\s*([^\s]+)/);
 		if (match) current.runLedgerId = match[1];
 	};
@@ -154,7 +198,7 @@ export default function (cmd: ModApi): void {
 			if (current.runLedgerId && runLedgerEnabled) {
 				const status = current.kujoFailures ? 'partial' : 'pass';
 				const verdict = current.kujoFailures ? 'Command Code run ended with failed Kujo MCP calls.' : 'Command Code run completed without failed Kujo MCP calls.';
-				try { await runLedgerCommand(['finish', current.runLedgerId, '--status', status, '--verdict', verdict, '--repo', process.cwd()]); } catch {}
+				try { await runLedgerCommand(project, ['finish', current.runLedgerId, '--status', status, '--verdict', verdict, '--repo', project]); } catch {}
 			}
 		},
 	});

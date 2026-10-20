@@ -41,7 +41,18 @@ test("setup, profiles, repair, and uninstall preserve unrelated host config", as
   assert.equal(Object.keys(installation.sources).length, catalog.sources.length);
   assert.equal((await lstat(installation.kujo_bin)).isSymbolicLink(), false);
   const mcp = JSON.parse(await readFile(join(project, ".mcp.json"), "utf8")); assert.ok(mcp.mcpServers.existing); assert.equal(mcp.mcpServers.kujo.transport, "stdio");
+  call = await exec(process.execPath, [cli, "setup", "--project", project, "--source-root", sources, "--mod-mode", "package", "--json"], { env });
+  result = JSON.parse(call.stdout);
+  assert.equal(result.mod_mode, "package"); assert.equal(result.host_assets, 7);
+  assert.equal(result.profile, "kujo.profile.review");
+  const migrated = JSON.parse(await readFile(join(project, ".kujo", "cmd.json"), "utf8"));
+  assert.deepEqual(migrated.disabled, ["kujo.fence.architecture.check"]);
+  assert.deepEqual(migrated.enabled, ["kujo.eval.suite.run"]);
+  await exec(process.execPath, [cli, "update", "--project", project, "--source-root", sources, "--json"], { env });
   await exec(process.execPath, [cli, "repair", "--project", project, "--json"], { env });
+  await assert.rejects(() => readFile(join(project, ".commandcode", "mods", "kujo-command-bridge.ts")), { code: "ENOENT" });
+  call = await exec(process.execPath, [cli, "setup", "--project", project, "--source-root", sources, "--json"], { env });
+  assert.equal(JSON.parse(call.stdout).mod_mode, "package");
   await exec(process.execPath, [cli, "uninstall", "--project", project, "--json"], { env });
   const after = JSON.parse(await readFile(join(project, ".mcp.json"), "utf8")); assert.ok(after.mcpServers.existing); assert.equal(after.mcpServers.kujo, undefined); assert.ok(await readFile(join(home, "receipts.jsonl"), "utf8"));
   await assert.rejects(() => readFile(join(project, ".commandcode", "mods", "kujo-command-bridge.ts"), "utf8"), { code: "ENOENT" });

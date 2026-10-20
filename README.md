@@ -19,6 +19,23 @@ the pinned Kujo tools and runtime. After that, normal use is local and works
 offline. Lens browser checks additionally require the optional Chromium install
 described below; flow validation does not.
 
+## Install as a Command Code mod
+
+The same package supports the mods directory. Install from GitHub:
+
+```sh
+cmd mods add kujolang/kujo-cmd
+```
+
+Use `/kujo` for help and `/kujo status` for current-session tool visibility.
+To connect the full Ability catalog, run the installed package's CLI with
+`setup --mod-mode package`, then restart Command Code. This explicit setup
+preserves the existing MCP approval and receipt system and prevents a duplicate
+project bridge. No setup runs automatically when the mod loads.
+
+See [installation, migration, and directory submission](docs/mods-directory.md)
+for exact instructions, including npm installation after the 0.3.0 release.
+
 ## What it adds to Command Code
 
 Kujo CMD exposes canonical Kujo products as portable Abilities. Command Code
@@ -127,8 +144,9 @@ kujo-cmd uninstall --purge         # remove shared Kujo CMD data
 ```
 
 Setup writes `.mcp.json`, `.kujo/cmd.json`, and the relevant links under
-`.agents/skills`. It also projects a trust-gated Command Code mod and seven
-scoped agents under `.commandcode/`. Their MCP allowlists are explicit and do
+`.agents/skills`. By default it also projects a trust-gated Command Code mod and seven
+scoped agents under `.commandcode/`. In `--mod-mode package`, the mod installer owns the bridge and setup only
+projects the agents. Their MCP allowlists are explicit and do
 not replace Command Code permission checks or Kujo's request-bound approvals.
 Shared sources and receipts default to
 `~/.local/share/kujo/cmd`. Set `KUJO_CMD_HOME` to move that data root.

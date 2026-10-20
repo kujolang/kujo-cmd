@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 - Unreleased
+
+- Make the existing package discoverable through `commandcode.mods` and the
+  `cmd-mod` keywords; include GitHub directory submission materials.
+- Add native `/kujo` help, setup instructions, and active-session MCP status.
+- Add explicit `setup --mod-mode package` migration, preserving profiles and
+  overrides and avoiding duplicate projected bridges across repair/update.
+- Resolve bridge telemetry and RunLedger paths against the host workspace.
+- Test packaged entrypoints, onboarding, lifecycle hooks, and migration.
 
 ## 0.2.0 - 2026-10-06
 
