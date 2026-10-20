@@ -13,6 +13,7 @@
     "assets/",
     ".generated/",
     "scripts/check-command-code-host.mjs",
+    "scripts/check-live-provider.mjs",
     "README.md",
     "LICENSE",
     "SECURITY.md",
@@ -25,7 +26,8 @@
     "pretest": "npm run build",
     "test": "node --test tests/catalog.test.mjs tests/executor.test.mjs tests/runtime.test.mjs tests/security.test.mjs tests/setup.test.mjs tests/release.test.mjs tests/mod.test.mjs",
     "test:e2e": "node tests/e2e.test.mjs",
-    "test:command-code": "node scripts/check-command-code-host.mjs"
+    "test:command-code": "node scripts/check-command-code-host.mjs",
+    "test:provider": "node scripts/check-live-provider.mjs"
   },
   "dependencies": {
     "@kujolang/kujo-runtime": "1.8.0"
