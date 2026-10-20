@@ -44,47 +44,43 @@ time of verification).
 - A production-only install of the packed tarball with `--ignore-scripts`
   succeeds. No Kujo source checkout or build script is needed to load the mod.
 
-### ChatGPT follow-up: live verification still blocked
+### Live Command Code + Hermes verification
 
-On 2026-10-20, Command Code auto-updated to 1.85.1 while listing models.
-The packed-package compatibility checks reached the live-session step, but
-that step again exited with code 3, `Not authenticated`, before any model or
-Kujo tool execution. ChatGPT login credentials are present under the `codex`
-provider, and the selected provider is `codex`; this is not evidence that the
-user omitted the ChatGPT login. Interactive startup also requests a separate
-Command Code account login.
+Command Code 1.85.1 now passes the actual packed-mod session test using the
+existing Hermes/Nous proxy at `http://127.0.0.1:8645/v1` and
+`hermes/poolside/laguna-s-2.1:free`. The real CLI loads the installed package,
+registers exactly one `/kujo` command, activates its MCP catalog, makes one
+model-generated catalog call, and returns the expected five Abilities.
 
-Inspection of the installed 1.85.1 CLI shows that print mode's authentication
-preflight calls `getCommandAuthKey`, which checks the Command Code API key;
-it does not accept the stored ChatGPT provider login at that stage. The public
-BYOK documentation advertises ChatGPT subscriptions, but that login alone has
-not unblocked this installed host. No workaround that bypasses authentication
-or changes host code was used.
+The installed host has a key-presence preflight even in local-only mode.
+ChatGPT login alone did not satisfy it. The successful run uses the explicit
+`KUJO_CMD_LOCAL_ONLY=1` test option: it sets `CMD_LOCAL_ONLY=1`, passes
+`--local-only`, and gives the child process a non-secret
+`COMMAND_CODE_API_KEY=local-only-placeholder`. No host code is patched and no
+Command Code credential is persisted. Local-only mode replaces the backend
+transport with a refusal transport; inference goes through Hermes to Nous.
+This is a locally verified workaround for 1.85.1, not an upstream-endorsed
+account-login procedure or an offline model test.
 
-The remaining gate is an actual model-driven catalog call and real session
-registration of `/kujo` and its MCP tools. Resolve the host authentication gate
-(with a Command Code account or an upstream-supported provider-only startup),
-then rerun `KUJO_CMD_LIVE_MODEL=<available-model-id> npm run test:command-code`.
-Do not describe the submission as fully live-verified until that passes.
-Ollama has been removed from this machine and is no longer a test option.
-Desktop behavior and other operating systems require their own host checks;
-the CI package suite covers Linux, macOS, and Windows on Node 20 and 22.
+Reproduce after adding the Hermes provider described in `mods-directory.md`:
 
-### Hermes provider fallback
+```sh
+KUJO_CMD_LOCAL_ONLY=1 \
+KUJO_CMD_LIVE_MODEL=hermes/poolside/laguna-s-2.1:free \
+COMMAND_CODE_EXPECTED_VERSION=1.85.1 npm run test:command-code
+```
 
-After repeating ChatGPT login, the minimal Command Code check still returned
-exit code 3 before model execution. Separately, `npm run test:provider` passed
-through the existing Hermes/Nous loopback proxy at port 8645 using
-`poolside/laguna-s-2.1:free`. The model generated and consumed successful calls
-to the actual Kujo catalog, PatchBrief and ShipCheck MCP tools, with receipts,
-in a disposable fixture against the pinned sources. Five tools were discovered.
-An initial attempt with `stepfun/step-3.7-flash:free` returned provider HTTP 429;
-no pass is claimed for that model.
+Interactive CLI checks also exercise `/kujo help`, `/kujo setup`, and
+`/kujo status`; status reports package mode and five active MCP tools.
+The interactive checks use the local checkout as an explicit mod source;
+the automated live check uses the production-only packed install.
 
-This proves a live provider-to-MCP path without Ollama. Hermes forwards model
-inference to its upstream provider; it is not an offline/local-model test.
-It does not replace the remaining Command Code session-loader and interactive
-checks described above. Existing AI Chat/provider settings were not modified.
+An independent `test:provider` run also passed through Hermes with model-
+generated catalog, PatchBrief and ShipCheck calls, successful receipts and
+model consumption of each result. An initial StepFun free-model attempt hit
+HTTP 429; no pass is claimed for that model. Ollama is no longer required.
+Desktop and other operating systems still need their own live checks; this
+record does not claim every tool/provider combination was executed.
 
 This document prepares the submission; it does not claim that the directory
 PR has been opened, accepted, or that version 0.3.0 has been published to npm.

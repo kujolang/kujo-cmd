@@ -157,3 +157,42 @@ Only loopback proxy URLs are accepted. The proxy may forward inference to a
 cloud provider; this is not an offline model test. Provider access and quota
 are required. This check does not certify Command Code authentication,
 interactive slash commands, or session mod loading.
+
+### Command Code sessions through Hermes
+
+Add this entry to the `provider` object in `~/.commandcode/providers.json`,
+preserving existing entries (the local Hermes proxy manages its Nous login):
+
+```json
+"hermes": {
+  "name": "Hermes (Nous local proxy)",
+  "baseURL": "http://127.0.0.1:8645/v1",
+  "apiKey": false,
+  "models": { "poolside/laguna-s-2.1:free": {} }
+}
+```
+
+Command Code 1.85.1 requires a nonempty Command Code key at startup even for
+local-only BYOK. For the verified local-only test workaround:
+
+```sh
+KUJO_CMD_LOCAL_ONLY=1 \
+KUJO_CMD_LIVE_MODEL=hermes/poolside/laguna-s-2.1:free \
+COMMAND_CODE_EXPECTED_VERSION=1.85.1 npm run test:command-code
+```
+
+The opt-in test sets an ephemeral non-secret key placeholder and explicitly
+enables local-only mode, whose transport refuses Command Code backend routes.
+The default test does not inject a key or change provider settings. Do not use
+the placeholder for Command Code gateway models or omit local-only mode.
+To launch an interactive session with the same workaround:
+
+```sh
+CMD_LOCAL_ONLY=1 COMMAND_CODE_API_KEY=local-only-placeholder \
+cmd --local-only --no-auto-update --model hermes/poolside/laguna-s-2.1:free
+```
+
+This workaround is tested against the unmodified 1.85.1 CLI, not documented
+as an upstream-supported authentication method. The underlying provider-only
+startup defect remains; account credentials are not overwritten. Hermes may
+call a cloud provider, so this is local proxy routing, not offline inference.
