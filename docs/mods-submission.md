@@ -44,14 +44,31 @@ time of verification).
 - A production-only install of the packed tarball with `--ignore-scripts`
   succeeds. No Kujo source checkout or build script is needed to load the mod.
 
-Interactive startup on this machine stops at Command Code authentication;
-no interactive slash-command or actual session-loader pass is claimed.
-The model-driven test was attempted with `ollama/glm-5.3:cloud`, but Command
-Code rejected it before model execution with exit code 3, `Not authenticated`.
-Run `cmd login`, then rerun the live verification before calling this a complete
-submission check. Desktop behavior and other
-operating systems require their own host checks; the CI package suite covers
-Linux, macOS, and Windows on Node 20 and 22.
+### ChatGPT follow-up: live verification still blocked
+
+On 2026-10-20, Command Code auto-updated to 1.85.1 while listing models.
+The packed-package compatibility checks reached the live-session step, but
+that step again exited with code 3, `Not authenticated`, before any model or
+Kujo tool execution. ChatGPT login credentials are present under the `codex`
+provider, and the selected provider is `codex`; this is not evidence that the
+user omitted the ChatGPT login. Interactive startup also requests a separate
+Command Code account login.
+
+Inspection of the installed 1.85.1 CLI shows that print mode's authentication
+preflight calls `getCommandAuthKey`, which checks the Command Code API key;
+it does not accept the stored ChatGPT provider login at that stage. The public
+BYOK documentation advertises ChatGPT subscriptions, but that login alone has
+not unblocked this installed host. No workaround that bypasses authentication
+or changes host code was used.
+
+The remaining gate is an actual model-driven catalog call and real session
+registration of `/kujo` and its MCP tools. Resolve the host authentication gate
+(with a Command Code account or an upstream-supported provider-only startup),
+then rerun `KUJO_CMD_LIVE_MODEL=<available-model-id> npm run test:command-code`.
+Do not describe the submission as fully live-verified until that passes.
+Ollama has been removed from this machine and is no longer a test option.
+Desktop behavior and other operating systems require their own host checks;
+the CI package suite covers Linux, macOS, and Windows on Node 20 and 22.
 
 This document prepares the submission; it does not claim that the directory
 PR has been opened, accepted, or that version 0.3.0 has been published to npm.
