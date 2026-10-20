@@ -56,3 +56,18 @@ assert.match(releaseWorkflow, /merge-base --is-ancestor/);
 assert.match(releaseWorkflow, /Check for an identical existing publication/);
 assert.match(releaseWorkflow, /npm diff --diff=/);
 assert.match(releaseWorkflow, /if: steps\.registry\.outputs\.published != 'true'/);
+
+assert.deepEqual(packageJson.commandcode.mods, ["./assets/command-code/mods/kujo-command-bridge.ts"]);
+for (const entry of packageJson.commandcode.mods) assert.ok(files.has(entry.replace(/^\.\//, "")));
+assert.ok(packageJson.keywords.includes("cmd-mod"));
+assert.equal(packageJson.scripts.postinstall, undefined);
+assert.ok(files.has("docs/mods-directory.md"));
+const bridge = await readFile(packageJson.commandcode.mods[0], "utf8");
+assert.ok(bridge.includes(`const packageVersion = '${VERSION}'`));
+
+for (const path of ["docs/mods-registry-entry.json", "docs/mods-submission.md"]) assert.ok(files.has(path));
+const entry = JSON.parse(await readFile("docs/mods-registry-entry.json", "utf8"));
+assert.equal(entry.name, "kujo-command-bridge");
+assert.equal(entry.source, "kujolang/kujo-cmd");
+assert.deepEqual(entry.kinds, ["command", "hook"]);
+assert.ok(entry.description.length <= 240);

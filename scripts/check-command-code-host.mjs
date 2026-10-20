@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import { execFile } from "node:child_process";
 import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -45,13 +46,13 @@ try {
 
   const executable = (await exec(process.platform === "win32" ? "where" : "which", [commandCode])).stdout.trim().split(/\r?\n/)[0];
   const commandPackage = resolve(dirname(await realpath(executable)), "..");
-  const { createJiti } = await import(pathToFileURL(join(commandPackage, "node_modules", "jiti", "lib", "jiti.mjs")));
+  const { createJiti } = await import(pathToFileURL(createRequire(join(commandPackage, "package.json")).resolve("jiti")));
   const projectedMod = join(project, ".commandcode", "mods", "kujo-command-bridge.ts");
   process.env.KUJO_CMD_WATCHDOG_URL = "invalid:";
   const loaded = await createJiti(import.meta.url).import(projectedMod);
   delete process.env.KUJO_CMD_WATCHDOG_URL;
   const hooks = []; const events = []; const subscribers = new Map();
-  loaded.default({ hooks(value) { hooks.push(value); return { dispose() {} }; }, on(name, handler) { events.push(name); subscribers.set(name, handler); return { dispose() {} }; } });
+  loaded.default({ cwd: project, addCommand() { return { dispose() {} }; }, hooks(value) { hooks.push(value); return { dispose() {} }; }, on(name, handler) { events.push(name); subscribers.set(name, handler); return { dispose() {} }; } });
   assert.ok(hooks.some((value) => value.afterToolCall && value.onStop && value.onRunEnd));
   assert.deepEqual(events.sort(), ["model_request_start", "run_start", "subagent_start", "subagent_stop"]);
   subscribers.get("run_start")({ type: "run_start", sessionId: "host-check" });
@@ -63,6 +64,34 @@ try {
     const agent = await readFile(join(project, ".commandcode", "agents", name), "utf8");
     assert.match(agent, /mcp__kujo__kujo_/); assert.doesNotMatch(agent, /tools:\s*["']?\*/);
   }
+
+  // Exercise the distributable, not just the checkout: no dev dependencies or lifecycle scripts.
+  const npmCli = process.env.npm_execpath;
+  assert.ok(npmCli, "run this check through npm run test:command-code");
+  const packed = JSON.parse((await exec(process.execPath, [npmCli, "pack", root, "--pack-destination", temporary, "--ignore-scripts", "--json"], { cwd: root })).stdout)[0];
+  const consumer = join(temporary, "consumer");
+  await exec(process.execPath, [npmCli, "install", "--prefix", consumer, join(temporary, packed.filename), "--ignore-scripts", "--omit=dev", "--no-audit", "--no-fund"], { timeout: 180_000 });
+  const installedPackage = join(consumer, "node_modules", "@kujolang", "kujo-cmd");
+  const manifest = JSON.parse(await readFile(join(installedPackage, "package.json"), "utf8"));
+  const installedEntry = resolve(installedPackage, manifest.commandcode.mods[0]);
+  const added = (await exec(commandCode, ["mods", "add", installedPackage], { cwd: project, env })).stdout;
+  assert.match(added, /Installed/);
+  const settings = JSON.parse(await readFile(join(project, ".commandcode", "settings.json"), "utf8"));
+  assert.ok(settings.mods.sources.length > 0);
+  const migrated = JSON.parse((await exec(process.execPath, [join(installedPackage, "bin", "kujo-cmd.mjs"), "setup", "--project", project, "--mod-mode", "package", ...(sourceRoot ? ["--source-root", sourceRoot] : []), "--json"], { env, timeout: 300_000 })).stdout);
+  assert.equal(migrated.mod_mode, "package"); assert.equal(migrated.host_assets, 7);
+  await assert.rejects(readFile(projectedMod), { code: "ENOENT" });
+  const commands = new Map();
+  const packaged = await createJiti(import.meta.url).import(installedEntry);
+  packaged.default({ cwd: project, addCommand(value) { commands.set(value.name, value); return { dispose() {} }; },
+    hooks() { return { dispose() {} }; }, on() { return { dispose() {} }; }, getActiveTools() { return []; } });
+  const guide = await commands.get("kujo").handler({ args: "setup" });
+  assert.ok(guide.message.includes(join(installedPackage, "bin", "kujo-cmd.mjs")));
+  const sessionStatus = await commands.get("kujo").handler({ args: "status" });
+  assert.match(sessionStatus.message, /mod mode: package/);
+  const inspection = (await exec(commandCode, ["mods", "inspect", installedEntry], { cwd: project, env })).stdout;
+  assert.match(inspection, /slash command/);
+  assert.match(inspection, /onStop/);
 
   let live = null;
   if (process.env.KUJO_CMD_LIVE_MODEL) {
@@ -86,7 +115,7 @@ try {
     live = { model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
   }
 
-  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "loaded", agents: 7, live }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "factory-tested", packed_mod: "installed-and-migrated", interactive_session: "not-tested", agents: 7, live }, null, 2)}\n`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }
