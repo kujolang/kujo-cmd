@@ -95,10 +95,21 @@ try {
 
   let live = null;
   if (process.env.KUJO_CMD_LIVE_MODEL) {
+    const evidencePath = join(temporary, "session-mod-evidence.json");
+    const probePath = join(temporary, "kujo-session-probe.ts");
+    await writeFile(probePath, `import {writeFile} from 'node:fs/promises';
+export default function(cmd) {
+  cmd.hooks({onRunEnd: async () => {
+    await writeFile(${JSON.stringify(evidencePath)}, JSON.stringify({commands: cmd.getCommands(), tools: cmd.getActiveTools()}));
+  }});
+}
+`);
     const liveOutput = (await exec(commandCode, [
       "-p",
       "Call the Kujo MCP tool named kujo_ability_catalog exactly once. Do not call any other tool. Then reply with only the count of returned abilities.",
       "--model", process.env.KUJO_CMD_LIVE_MODEL,
+      "--mod", installedPackage,
+      "--mod", probePath,
       "--max-turns", "3",
       "--output-format", "json",
       "--no-session",
@@ -112,7 +123,10 @@ try {
     assert.equal(result.finalText.trim(), "5");
     const calls = events.filter((event) => event.event?.type === "tool_completed" && event.event.toolName === "mcp__kujo__kujo_ability_catalog");
     assert.equal(calls.length, 1);
-    live = { model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
+    const sessionEvidence = JSON.parse(await readFile(evidencePath, "utf8"));
+    assert.ok(sessionEvidence.commands.some((command) => command.name === "kujo"), "real host did not register /kujo");
+    assert.ok(sessionEvidence.tools.includes("mcp__kujo__kujo_ability_catalog"), "real host did not activate the Kujo MCP catalog");
+    live = { session_mod_registered: true, model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
   }
 
   process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "factory-tested", packed_mod: "installed-and-migrated", interactive_session: "not-tested", agents: 7, live }, null, 2)}\n`);

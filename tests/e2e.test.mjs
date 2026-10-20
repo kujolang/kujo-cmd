@@ -11,6 +11,7 @@ import { promisify } from "node:util";
 import { lensBrowserStatus } from "../lib/lens.mjs";
 
 const exec = promisify(execFile);
+const exercisedTools = new Set();
 const root = resolve(".");
 const packageRoot = root;
 const cli = join(packageRoot, "bin", "kujo-cmd.mjs");
@@ -25,7 +26,7 @@ function rpcProcess(env) {
   const pending = new Map(); let next = 1; let stderr = ""; child.stderr.on("data", (chunk) => { stderr += chunk; });
   createInterface({ input: child.stdout }).on("line", (line) => { const message = JSON.parse(line); pending.get(message.id)?.(message); pending.delete(message.id); });
   return {
-    request(method, params = {}) { const id = next++; child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`); return new Promise((resolveMessage, reject) => { pending.set(id, resolveMessage); setTimeout(() => reject(new Error(`RPC timeout: ${method}; ${stderr}`)), 30_000).unref(); }); },
+    request(method, params = {}) { if (method === "tools/call") exercisedTools.add(params.name); const id = next++; child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`); return new Promise((resolveMessage, reject) => { pending.set(id, resolveMessage); setTimeout(() => reject(new Error(`RPC timeout: ${method}; ${stderr}`)), 30_000).unref(); }); },
     close() { child.stdin.end(); child.kill("SIGTERM"); },
   };
 }
@@ -48,10 +49,12 @@ let rpc = rpcProcess(env);
 let message = await rpc.request("initialize", { protocolVersion: "1900-01-01" }); assert.equal(message.error.code, -32602);
 message = await rpc.request("initialize", { protocolVersion: "2025-11-25" }); assert.equal(message.result.serverInfo.name, "kujo-cmd");
 message = await rpc.request("tools/list"); assert.equal(message.result.tools.length, 5); assert.ok(message.result.tools.every((tool) => tool._meta["kujo/abilityId"]));
-const [catalog, patchbrief] = await Promise.all([
+const [catalog, patchbrief, shipcheck] = await Promise.all([
   rpc.request("tools/call", { name: "kujo_ability_catalog", arguments: { _kujo: { sessionId: "session-a", runId: "run-a", modelId: "ollama/glm-5.3:cloud" } } }),
   rpc.request("tools/call", { name: "kujo_patchbrief_summarize", arguments: { path: ".", format: "json", _kujo: { traceId: "trace-patchbrief" } } }),
+  rpc.request("tools/call", { name: "kujo_shipcheck_scan", arguments: { path: "." } }),
 ]);
+assert.equal(shipcheck.result.structuredContent.ok, true, JSON.stringify(shipcheck.result.structuredContent));
 assert.equal(catalog.result.structuredContent.ok, true); assert.equal(catalog.result.structuredContent.receipt.metadata.model_id, "ollama/glm-5.3:cloud");
 assert.equal(patchbrief.result.structuredContent.ok, true, JSON.stringify(patchbrief.result.structuredContent)); assert.equal(patchbrief.result.structuredContent.receipt.result.exit_code, 0);
 
@@ -114,7 +117,9 @@ const howlInput = { path: ".", manifest: "howl.json", output_dir: "dist/howl-e2e
 message = await rpc.request("tools/call", { name: "kujo_howl_render", arguments: { ...howlInput, _kujo: { invocationId: "howl-1", idempotencyKey: "howl-key" } } }); assert.equal(message.result.structuredContent.code, "ability_approval_required");
 const howlApproval = JSON.parse((await exec(process.execPath, [cli, "approve", "--project", project, "--ability", "kujo.howl.showcase.render", "--invocation", "howl-1", "--input", JSON.stringify(howlInput), "--json"], { env: { ...process.env, ...env } })).stdout);
 message = await rpc.request("tools/call", { name: "kujo_howl_render", arguments: { ...howlInput, _kujo: { invocationId: "howl-1", idempotencyKey: "howl-key", approvalId: howlApproval.approval_id } } }); assert.equal(message.result.structuredContent.ok, true, JSON.stringify(message.result.structuredContent));
-if ((await lensBrowserStatus(installation.sources.lens.path)).ready) {
+const browserReady = (await lensBrowserStatus(installation.sources.lens.path)).ready;
+if (process.env.KUJO_CMD_REQUIRE_BROWSER === "1") assert.ok(browserReady, "Lens browser is required for this run; install it first");
+if (browserReady) {
   const fixtureServer = createServer((_request, response) => { response.writeHead(200, { "Content-Type": "text/html" }); response.end("<!doctype html><title>Fixture</title><main><h1>Fixture</h1></main>"); });
   await new Promise((resolveListen) => fixtureServer.listen(0, "127.0.0.1", resolveListen));
   try {
@@ -126,7 +131,19 @@ if ((await lensBrowserStatus(installation.sources.lens.path)).ready) {
 }
 rpc.close();
 
+const selectedFull = JSON.parse((await exec(process.execPath, [cli, "profile", "kujo.profile.full", "--project", project, "--json"], { env: { ...process.env, ...env } })).stdout);
+assert.equal(selectedFull.abilities, 38);
+rpc = rpcProcess(env); await rpc.request("initialize", { protocolVersion: "2025-11-25" });
+message = await rpc.request("tools/list");
+assert.equal(message.result.tools.length, 38);
+for (const tool of message.result.tools) {
+  assert.ok(tool._meta["kujo/abilityId"], `missing Ability identity: ${tool.name}`);
+  assert.equal(tool.inputSchema.type, "object", `invalid input schema: ${tool.name}`);
+  assert.equal(tool.outputSchema.type, "object", `invalid result schema: ${tool.name}`);
+}
+rpc.close();
+
 const config = JSON.parse(await readFile(join(project, ".kujo", "cmd.json"), "utf8"));
 assert.equal(config.sources, undefined);
 assert.equal(Object.keys(installation.sources).length, 25);
-console.log("Command Code local package compatibility: setup, discovery, schema metadata, canonical invocation, approvals, receipts, concurrency, and restart passed");
+console.log(JSON.stringify({ ok: true, profiles: { essentials: 5, review: 18, ship: 29, full: 38 }, exercised_tools: [...exercisedTools].sort(), browser: browserReady ? "passed" : "skipped: runtime unavailable", checks: ["setup", "discovery", "schemas", "invocation", "approvals", "receipts", "concurrency", "restart"] }, null, 2));

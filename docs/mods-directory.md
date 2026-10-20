@@ -104,6 +104,26 @@ npm test
 npm run test:command-code
 ```
 
+For real-tool and browser coverage (after installing Lens through the CLI):
+
+```sh
+KUJO_CMD_REQUIRE_BROWSER=1 npm run test:e2e
+```
+
+Use `KUJO_SOURCE_ROOT` to point the checks at verified pinned checkouts when
+validating a release rather than local development repositories. The e2e
+result names the tools exercised and explicitly reports browser skips.
+
+After `cmd login`, run the optional real-session test with an available model:
+
+```sh
+COMMAND_CODE_EXPECTED_VERSION=1.85.0 KUJO_CMD_LIVE_MODEL=ollama/glm-5.3:cloud npm run test:command-code
+```
+
+This loads the packaged mod into the actual host, calls the catalog through
+MCP, and records host command/tool registration via a temporary probe mod.
+It makes a real model call and requires that provider to be configured.
+
 The host check uses a disposable project and Kujo data root. The optional
 `KUJO_CMD_LIVE_MODEL` check makes a model call; omit it for local checks.
 The pack test validates the published file list and manifest. Mod tests load
