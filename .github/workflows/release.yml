@@ -27,9 +27,9 @@ jobs:
         run: |
           package_version="$(node -p "require('./package.json').version")"
           test "${GITHUB_REF_NAME}" = "v${package_version}"
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "24"
+          node-version: "24.22.1"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
       - name: Use a pinned npm CLI with trusted-publishing support
