@@ -1,6 +1,6 @@
 # Kujo CMD
 
-[![Version](https://img.shields.io/badge/version-0.2.0-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.2.0)
+[![Version](https://img.shields.io/badge/version-0.3.0-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.3.0)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![built with Kujo](https://img.shields.io/badge/built%20with-Kujo-white.svg)](https://github.com/kujolang/kujo)
 
@@ -34,7 +34,7 @@ preserves the existing MCP approval and receipt system and prevents a duplicate
 project bridge. No setup runs automatically when the mod loads.
 
 See [installation, migration, and directory submission](docs/mods-directory.md)
-for exact instructions, including npm installation after the 0.3.0 release.
+for exact instructions, including npm installation for 0.3.0.
 
 ## What it adds to Command Code
 

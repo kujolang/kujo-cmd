@@ -26,13 +26,13 @@ node /absolute/path/to/installed/kujo-cmd/bin/kujo-cmd.mjs setup --mod-mode pack
 ```
 
 This uses the same version as the installed mod without requiring an npm
-release. Node 20+, Git, and the platform's optional Kujo runtime dependency are
+release. A Node version supported by `package.json`, Git, and the platform's optional Kujo runtime dependency are
 required. Setup downloads pinned sources on first use, writes `.mcp.json`,
 links the active skills, and projects seven scoped agents. Restart Command Code
 after setup. Run `/kujo status` and ask it to call `kujo_ability_catalog` to
 verify tool discovery. `kujo-cmd doctor` provides fuller local diagnostics.
 
-## Install from npm after 0.3.0 is published
+## Install from npm
 
 ```sh
 cmd mods add @kujolang/kujo-cmd@0.3.0
