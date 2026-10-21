@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 - Unreleased
+## 0.3.0 - 2026-10-21
 
 - Fix Lens readiness detection for Playwright headless-shell-only installs by
   verifying a headless launch instead of checking the headed browser path.
