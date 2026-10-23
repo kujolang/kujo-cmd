@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { lstat, mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -15,8 +15,10 @@ test("setup, profiles, repair, and uninstall preserve unrelated host config", as
   for (const source of catalog.sources) { await mkdir(join(sources, source.id, "skills"), { recursive: true }); }
   for (const name of ["kujo-scout-workflows", "kujo-patchbrief-workflows", "kujo-shipcheck-workflows", "kujo-changebucket-workflows", "kujo-fence-workflows", "kujo-spec-workflows", "kujo-scent-workflows", "kujo-eval-workflows", "kujo-dispatch-workflows", "kujo-runledger-workflows", "kujo-watchdog-workflows", "kujo-rag-workflows", "kujo-casefile-workflows", "kujo-concord-workflows", "kujo-muzzle-workflows", "kujo-kennel-workflows", "kujo-redact-workflows", "kujo-versionseal-workflows", "kujo-packwrite-workflows", "kujo-tribunal-workflows", "kujo-dossier-workflows", "kujo-howl-workflows", "kujo-lens-workflows"]) { const path = join(sources, "kujo-skills", "skills", name); await mkdir(path, { recursive: true }); await writeFile(join(path, "SKILL.md"), `---\nname: ${name}\ndescription: fixture\n---\n`); }
   await writeFile(join(project, ".mcp.json"), JSON.stringify({ mcpServers: { existing: { command: "existing" } } }));
+  await writeFile(join(project, ".gitignore"), "# existing rules\nnode_modules/");
   const env = { ...process.env, KUJO_CMD_HOME: home, KUJO_BIN: linkedRuntime };
   let call = await exec(process.execPath, [cli, "setup", "--project", project, "--source-root", sources, "--json"], { env }); let result = JSON.parse(call.stdout); assert.equal(result.abilities, 5); assert.equal(result.hosted_service_required, false); assert.equal(result.host_assets, 8);
+  assert.equal(await readFile(join(project, ".gitignore"), "utf8"), "# existing rules\nnode_modules/\n/.kujo/watchdog-spool/\n");
   assert.match(await readFile(join(project, ".commandcode", "mods", "kujo-command-bridge.ts"), "utf8"), /onStop/);
   assert.match(await readFile(join(project, ".commandcode", "agents", "kujo-reviewer.md"), "utf8"), /mcp__kujo__kujo_concord_scan/);
   assert.match(await readFile(join(project, ".commandcode", "agents", "kujo-safety-evidence.md"), "utf8"), /mcp__kujo__kujo_redact_scan/);
@@ -26,7 +28,10 @@ test("setup, profiles, repair, and uninstall preserve unrelated host config", as
   call = await exec(process.execPath, [cli, "profile", "kujo.profile.review", "--project", project, "--json"], { env }); result = JSON.parse(call.stdout); assert.equal(result.abilities, 18);
   await exec(process.execPath, [cli, "disable", "kujo.fence.architecture.check", "--project", project, "--json"], { env });
   await exec(process.execPath, [cli, "enable", "kujo.eval.suite.run", "--project", project, "--json"], { env });
+  await rm(join(project, ".gitignore"));
   call = await exec(process.execPath, [cli, "update", "--project", project, "--source-root", sources, "--json"], { env }); result = JSON.parse(call.stdout);
+  assert.equal(await readFile(join(project, ".gitignore"), "utf8"), "/.kujo/watchdog-spool/\n");
+  await writeFile(join(project, ".gitignore"), "# existing rules\nnode_modules/\n/.kujo/watchdog-spool/\n");
   assert.equal(result.profile, "kujo.profile.review");
   assert.deepEqual(result.disabled, ["kujo.fence.architecture.check"]);
   assert.deepEqual(result.enabled, ["kujo.eval.suite.run"]);
@@ -49,10 +54,12 @@ test("setup, profiles, repair, and uninstall preserve unrelated host config", as
   assert.deepEqual(migrated.disabled, ["kujo.fence.architecture.check"]);
   assert.deepEqual(migrated.enabled, ["kujo.eval.suite.run"]);
   await exec(process.execPath, [cli, "update", "--project", project, "--source-root", sources, "--json"], { env });
+  await writeFile(join(project, ".gitignore"), "# existing rules\nnode_modules/");
   await exec(process.execPath, [cli, "repair", "--project", project, "--json"], { env });
   await assert.rejects(() => readFile(join(project, ".commandcode", "mods", "kujo-command-bridge.ts")), { code: "ENOENT" });
   call = await exec(process.execPath, [cli, "setup", "--project", project, "--source-root", sources, "--json"], { env });
   assert.equal(JSON.parse(call.stdout).mod_mode, "package");
+  assert.equal(await readFile(join(project, ".gitignore"), "utf8"), "# existing rules\nnode_modules/\n/.kujo/watchdog-spool/\n");
   await exec(process.execPath, [cli, "uninstall", "--project", project, "--json"], { env });
   const after = JSON.parse(await readFile(join(project, ".mcp.json"), "utf8")); assert.ok(after.mcpServers.existing); assert.equal(after.mcpServers.kujo, undefined); assert.ok(await readFile(join(home, "receipts.jsonl"), "utf8"));
   await assert.rejects(() => readFile(join(project, ".commandcode", "mods", "kujo-command-bridge.ts"), "utf8"), { code: "ENOENT" });

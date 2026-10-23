@@ -8,18 +8,17 @@ import {mkdir, readFile, readdir, rename, unlink, writeFile} from 'node:fs/promi
 import {promisify} from 'node:util';
 
 const execute = promisify(execFile);
-const watchdogUrl = process.env.KUJO_CMD_WATCHDOG_URL || 'http://127.0.0.1:7700';
 const runLedgerEnabled = process.env.KUJO_CMD_RUNLEDGER === '1';
 const jidokaEnabled = process.env.KUJO_CMD_JIDOKA !== '0';
 // Kept in sync with package.json by the release test; this file also runs as a standalone projection.
-const packageVersion = '0.3.0';
+const packageVersion = '0.3.1';
 
 function hash(value: string, length: number): string {
 	return createHash('sha256').update(value).digest('hex').slice(0, length);
 }
 
 function endpoint(): URL {
-	const url = new URL('/telemetry/v2/batches', watchdogUrl);
+	const url = new URL('/telemetry/v2/batches', process.env.KUJO_CMD_WATCHDOG_URL || 'http://127.0.0.1:7700');
 	const loopback = ['127.0.0.1', 'localhost', '::1', '[::1]'].includes(url.hostname);
 	if (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) throw new Error('Kujo bridge Watchdog endpoint must use HTTPS or loopback HTTP');
 	if (url.username || url.password || url.search || url.hash) throw new Error('Kujo bridge Watchdog endpoint cannot contain credentials, query, or fragment');
@@ -50,11 +49,24 @@ async function deliver(url: URL, batch: object): Promise<{ok: boolean; retryable
 	}
 }
 
+async function recordingEnabled(project: string): Promise<boolean> {
+	if (process.env.KUJO_CMD_WATCHDOG === '0') return false;
+	if (process.env.KUJO_CMD_WATCHDOG === '1') return true;
+	try {
+		const config = JSON.parse(await readFile(join(project, '.kujo', 'cmd.json'), 'utf8'));
+		return config?.schema === 'kujo.cmd.config/v1' && typeof config.profile === 'string' && config.profile.length > 0;
+	} catch { return false; }
+}
+
 async function submit(spoolRoot: string, batch: object): Promise<void> {
 	let url: URL;
 	try { url = endpoint(); } catch { return; }
-	await mkdir(spoolRoot, {recursive: true, mode: 0o700});
-	for (const name of (await readdir(spoolRoot)).filter(value => value.endsWith('.json')).sort()) {
+	let files: string[];
+	try { files = await readdir(spoolRoot); } catch (error) {
+		if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+		files = [];
+	}
+	for (const name of files.filter(value => value.endsWith('.json')).sort()) {
 		const path = join(spoolRoot, name);
 		let pending: object;
 		try { pending = JSON.parse(await readFile(path, 'utf8')); } catch { await unlink(path); continue; }
@@ -105,7 +117,7 @@ export default function (cmd: ModApi): void {
 			'Run in your project terminal:',
 			packaged ? `node ${quotedCli} setup --mod-mode package` : `npx @kujolang/kujo-cmd@${packageVersion} setup`,
 			'Setup downloads pinned Kujo sources and writes project MCP, skills, and agent configuration. Restart Command Code afterward.',
-			packaged ? 'The installed mod package supplies this CLI; no separate npm release is required.' : 'To migrate to a directory install, first run cmd mods add kujolang/kujo-cmd, then use that package’s CLI with setup --mod-mode package.',
+			packaged ? 'The installed mod package supplies this CLI; no separate npm release is required.' : 'To migrate to a directory install, first run cmd mods add @kujolang/kujo-cmd, then use that package’s CLI with setup --mod-mode package.',
 		].join('\n');
 	};
 	cmd.addCommand({
@@ -139,16 +151,20 @@ export default function (cmd: ModApi): void {
 	const enqueue = (work: () => Promise<void>) => { queue = queue.then(work, work); };
 	const record = (name: string, status: 'ok' | 'error' | 'cancelled' = 'ok', references: Array<{type: 'session' | 'run' | 'agent' | 'tool_call'; id: string}> = [], attributes: Record<string, string | number | boolean> = {}) => {
 		if (!current) return;
-		const now = new Date().toISOString();
-		const recordId = randomUUID();
-		const outcome = status === 'ok' ? 'success' : status;
-		const refs = [{type: 'session' as const, id: current.sessionId}, ...(current.runLedgerId ? [{type: 'run' as const, id: current.runLedgerId, namespace: 'runledger'}] : []), ...references];
-		const batch = {
-			schema_version: 'watchdog.telemetry.v2', batch_id: `command-code:${recordId}`, sent_at: now,
-			producer: {name: 'kujo-cmd-command-code', version: '1.0.0', adapter_id: 'kujo.cmd.command-code.mod', adapter_version: '1.0.0', original_schema: 'command-code.agent-event'},
-			records: [{record_id: recordId, record_type: 'event', trace_id: current.traceId, observed_at: now, kind: name.includes('tool') ? 'tool' : name.includes('agent') ? 'agent' : 'workflow', name, status, source: {'watchdog.semantic_profile': 'watchdog.observability.v1', 'application.name': 'kujo-cmd', 'harness.name': 'command-code', 'instrumentation.name': 'kujo.cmd.command-code.mod', 'instrumentation.version': '1.0.0'}, references: refs, attributes: {...attributes, 'watchdog.outcome.code': outcome, 'watchdog.outcome.terminal': true}, content: [], privacy: {content_mode: 'off', policy_version: 'watchdog.privacy.v1', transformations: ['metadata_only']}}],
-		};
-		enqueue(() => submit(spoolRoot, batch));
+		const state = {...current};
+		enqueue(async () => {
+			if (!await recordingEnabled(project)) return;
+			const now = new Date().toISOString();
+			const recordId = randomUUID();
+			const outcome = status === 'ok' ? 'success' : status;
+			const refs = [{type: 'session' as const, id: state.sessionId}, ...(state.runLedgerId ? [{type: 'run' as const, id: state.runLedgerId, namespace: 'runledger'}] : []), ...references];
+			const batch = {
+				schema_version: 'watchdog.telemetry.v2', batch_id: `command-code:${recordId}`, sent_at: now,
+				producer: {name: 'kujo-cmd-command-code', version: '1.0.0', adapter_id: 'kujo.cmd.command-code.mod', adapter_version: '1.0.0', original_schema: 'command-code.agent-event'},
+				records: [{record_id: recordId, record_type: 'event', trace_id: state.traceId, observed_at: now, kind: name.includes('tool') ? 'tool' : name.includes('agent') ? 'agent' : 'workflow', name, status, source: {'watchdog.semantic_profile': 'watchdog.observability.v1', 'application.name': 'kujo-cmd', 'harness.name': 'command-code', 'instrumentation.name': 'kujo.cmd.command-code.mod', 'instrumentation.version': '1.0.0'}, references: refs, attributes: {...attributes, 'watchdog.outcome.code': outcome, 'watchdog.outcome.terminal': true}, content: [], privacy: {content_mode: 'off', policy_version: 'watchdog.privacy.v1', transformations: ['metadata_only']}}],
+			};
+			await submit(spoolRoot, batch);
+		});
 	};
 
 	const startLedger = async () => {

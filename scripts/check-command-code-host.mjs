@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { execFile } from "node:child_process";
-import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -88,6 +88,25 @@ try {
   const migrated = JSON.parse((await exec(process.execPath, [join(installedPackage, "bin", "kujo-cmd.mjs"), "setup", "--project", project, "--mod-mode", "package", ...(sourceRoot ? ["--source-root", sourceRoot] : []), "--json"], { env, timeout: 300_000 })).stdout);
   assert.equal(migrated.mod_mode, "package"); assert.equal(migrated.host_assets, 7);
   await assert.rejects(readFile(projectedMod), { code: "ENOENT" });
+  const unconfigured = join(temporary, "unconfigured");
+  await mkdir(unconfigured);
+  const unconfiguredEvents = new Map(); const unconfiguredHooks = [];
+  const unconfiguredFactory = await createJiti(import.meta.url).import(installedEntry);
+  unconfiguredFactory.default({ cwd: unconfigured,
+    addCommand() { return { dispose() {} }; },
+    hooks(value) { unconfiguredHooks.push(value); return { dispose() {} }; },
+    on(name, handler) { unconfiguredEvents.set(name, handler); return { dispose() {} }; },
+    getActiveTools() { return []; } });
+  const priorConsent = process.env.KUJO_CMD_WATCHDOG;
+  delete process.env.KUJO_CMD_WATCHDOG;
+  try {
+    unconfiguredEvents.get("run_start")({ type: "run_start", sessionId: "unconfigured-package" });
+    await unconfiguredHooks[0].afterToolCall({ toolCallId: "fixture", toolName: "mcp__kujo__kujo_ability_catalog", isError: false });
+    await unconfiguredHooks[0].onRunEnd();
+    assert.deepEqual(await readdir(unconfigured), [], "packed mod must leave unconfigured projects untouched");
+  } finally {
+    if (priorConsent !== undefined) process.env.KUJO_CMD_WATCHDOG = priorConsent;
+  }
   const commands = new Map();
   const packaged = await createJiti(import.meta.url).import(installedEntry);
   packaged.default({ cwd: project, addCommand(value) { commands.set(value.name, value); return { dispose() {} }; },
@@ -137,7 +156,7 @@ export default function(cmd) {
     live = { session_mod_registered: true, local_only: localOnly, local_key_placeholder: localOnly, model: process.env.KUJO_CMD_LIVE_MODEL, final_text: result.finalText.trim(), catalog_calls: calls.length };
   }
 
-  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "factory-tested", packed_mod: "installed-and-migrated", interactive_session: "not-tested", agents: 7, live }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ ok: true, command_code: version, abilities: setup.abilities, skills: setup.skills, mcp: "enabled", mod: "factory-tested", packed_mod: "installed-and-migrated", unconfigured_project: "untouched", interactive_session: "not-tested", agents: 7, live }, null, 2)}\n`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }

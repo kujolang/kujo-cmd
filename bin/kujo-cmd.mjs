@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
 import { createApp, loadProjectConfig } from "../lib/app.mjs";
 import { loadCatalog, profileAbilities } from "../lib/catalog.mjs";
-import { checkCommandCodeAssets, configureMcp, installProjection, installSources, projectCommandCodeAssets, projectSkills, removeCommandCodeAssets, removeMcp, removeProjectedSkills } from "../lib/install.mjs";
+import { checkCommandCodeAssets, configureMcp, configureWatchdogIgnore, installProjection, installSources, projectCommandCodeAssets, projectSkills, removeCommandCodeAssets, removeMcp, removeProjectedSkills } from "../lib/install.mjs";
 import { loadInstallation, writeInstallation } from "../lib/installation.mjs";
 import { readJson, writeJson } from "../lib/io.mjs";
 import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths } from "../lib/paths.mjs";
@@ -50,6 +50,7 @@ async function setup(opts) {
   const installedAt = new Date().toISOString();
   const installation = await writeInstallation({ version: VERSION, sources, projection_root: projection.root, kujo_bin: projection.kujo, installed_at: installedAt });
   const paths = projectPaths(project); const config = { schema: "kujo.cmd.config/v1", version: VERSION, installation_version: VERSION, profile, mod_mode: modMode, enabled: previous?.enabled || [], disabled: previous?.disabled || [], installed_at: installedAt };
+  await configureWatchdogIgnore(project);
   await writeJson(paths.config, config);
   const trustedConfig = { ...config, ...installation };
   const skills = await projectSkills(catalog, trustedConfig, project); const hostAssets = await projectCommandCodeAssets(project, modMode); const mcp = await configureMcp(trustedConfig, project);
@@ -166,7 +167,7 @@ async function watchdogProcessMatches(current) {
   return outcome.exitCode === 0 && outcome.stdout.includes(current.script);
 }
 
-async function repair(opts) { const project = resolve(opts.project || process.cwd()); const catalog = await loadCatalog(); const { config } = await loadProjectConfig(project, catalog); const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project, config.mod_mode); const mcp = await configureMcp(config, project); output({ ok: true, message: "Kujo CMD projections repaired.", skills, host_assets: hostAssets, mcp }, opts.json); }
+async function repair(opts) { const project = resolve(opts.project || process.cwd()); const catalog = await loadCatalog(); const { config } = await loadProjectConfig(project, catalog); await configureWatchdogIgnore(project); const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project, config.mod_mode); const mcp = await configureMcp(config, project); output({ ok: true, message: "Kujo CMD projections repaired.", skills, host_assets: hostAssets, mcp }, opts.json); }
 
 async function update(opts) {
   const catalog = await loadCatalog();
@@ -183,6 +184,7 @@ async function update(opts) {
   const nextInstallation = await writeInstallation({ version: VERSION, sources, projection_root: projection.root, kujo_bin: projection.kujo, installed_at: installation.installed_at, updated_at: updatedAt });
   const nextProject = { ...projectConfig, version: VERSION, installation_version: VERSION, updated_at: updatedAt }; await writeJson(paths.config, nextProject);
   const config = { ...nextProject, ...nextInstallation };
+  await configureWatchdogIgnore(project);
   const skills = await projectSkills(catalog, config, project); const hostAssets = await projectCommandCodeAssets(project, config.mod_mode); const mcp = await configureMcp(config, project);
   output({ ok: true, message: "Kujo CMD updated without changing profile exposure.", profile: config.profile, enabled: config.enabled, disabled: config.disabled, skills, host_assets: hostAssets, mcp }, opts.json);
 }
