@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { chmod, mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handlers } from "../lib/executor.mjs";
@@ -39,11 +39,12 @@ test("Lens browser status requires the bridge dependency and a successful headle
 });
 
 test("Lens browser installer uses the locked bridge lifecycle and verifies Chromium", async () => {
-  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-lens-install-")); const bridge = join(root, "bridge"); const fakeNpm = join(root, "npm-fixture"); const executable = join(root, "chromium");
+  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-lens-install-")); const bridge = join(root, "bridge"); const fakeNpm = join(bridge, "ci"); const executable = join(root, "chromium");
   await mkdir(bridge, { recursive: true }); await writeFile(join(bridge, "package-lock.json"), "{}\n");
   await writeFile(fakeNpm, `#!/usr/bin/env node\nconst fs=require('node:fs');const path=require('node:path');const root=process.cwd();const moduleRoot=path.join(root,'node_modules','playwright-core');fs.mkdirSync(moduleRoot,{recursive:true});fs.writeFileSync(${JSON.stringify(executable)},'fixture');fs.writeFileSync(path.join(moduleRoot,'index.js'),${JSON.stringify(`module.exports={chromium:{async launch(options){if(options.headless!==true || !require("node:fs").existsSync(${JSON.stringify(executable)}))throw new Error("browser unavailable");return {async close(){}}},executablePath(){return ${JSON.stringify(executable)}}}};\n`)});\n`);
-  await chmod(fakeNpm, 0o755);
-  const status = await installLensBrowser(root, { npmCommand: fakeNpm }); assert.equal(status.ready, true); assert.equal(status.executable, executable);
+  // Node executes these fixture scripts on every platform, including Windows.
+  await writeFile(join(bridge, "run"), await readFile(fakeNpm));
+  const status = await installLensBrowser(root, { npmCommand: process.execPath }); assert.equal(status.ready, true); assert.equal(status.executable, executable);
 });
 
 
