@@ -67,7 +67,8 @@ assert.ok(bridge.includes(`const packageVersion = '${VERSION}'`));
 
 for (const path of ["docs/mods-registry-entry.json", "docs/mods-submission.md"]) assert.ok(files.has(path));
 const entry = JSON.parse(await readFile("docs/mods-registry-entry.json", "utf8"));
-assert.equal(entry.name, "kujo-command-bridge");
-assert.equal(entry.source, "kujolang/kujo-cmd");
+assert.equal(entry.name, "kujo-cmd");
+assert.equal(entry.source, "@kujolang/kujo-cmd");
+assert.equal(entry.npm, "@kujolang/kujo-cmd");
 assert.deepEqual(entry.kinds, ["command", "hook"]);
 assert.ok(entry.description.length <= 240);

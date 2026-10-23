@@ -1,6 +1,6 @@
 # Kujo CMD
 
-[![Version](https://img.shields.io/badge/version-0.3.0-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.3.0)
+[![Version](https://img.shields.io/badge/version-0.3.1-black)](https://github.com/kujolang/kujo-cmd/releases/tag/v0.3.1)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![built with Kujo](https://img.shields.io/badge/built%20with-Kujo-white.svg)](https://github.com/kujolang/kujo)
 
@@ -21,10 +21,10 @@ described below; flow validation does not.
 
 ## Install as a Command Code mod
 
-The same package supports the mods directory. Install from GitHub:
+The same package supports the mods directory. Install from npm:
 
 ```sh
-cmd mods add kujolang/kujo-cmd
+cmd mods add @kujolang/kujo-cmd
 ```
 
 Use `/kujo` for help and `/kujo status` for current-session tool visibility.
@@ -34,7 +34,7 @@ preserves the existing MCP approval and receipt system and prevents a duplicate
 project bridge. No setup runs automatically when the mod loads.
 
 See [installation, migration, and directory submission](docs/mods-directory.md)
-for exact instructions, including npm installation for 0.3.0.
+for exact instructions, including package-mode setup.
 
 ## What it adds to Command Code
 
@@ -147,7 +147,11 @@ Setup writes `.mcp.json`, `.kujo/cmd.json`, and the relevant links under
 `.agents/skills`. By default it also projects a trust-gated Command Code mod and seven
 scoped agents under `.commandcode/`. In `--mod-mode package`, the mod installer owns the bridge and setup only
 projects the agents. Their MCP allowlists are explicit and do
-not replace Command Code permission checks or Kujo's request-bound approvals.
+not replace Kujo's request-bound approvals. The seven agents declare
+`permissionMode: dont-ask` at the Command Code layer. This does not grant
+approval to mutating Kujo Abilities: the Kujo runtime still requires a human
+approval bound to the exact request, consumes it once, and records a receipt.
+An agent's tool allowlist or permission mode cannot bypass that runtime gate.
 Shared sources and receipts default to
 `~/.local/share/kujo/cmd`. Set `KUJO_CMD_HOME` to move that data root.
 
@@ -156,9 +160,20 @@ pinned headless Chromium build into the Lens source/cache locations. It is an
 explicit networked step rather than a hidden setup side effect. When the Ship
 or Full profile exposes browser checks, `kujo-cmd doctor` verifies that runtime.
 
-The projected mod records metadata-only session, subagent, and Kujo tool
-correlation to loopback Watchdog, spooling a bounded queue under
-`.kujo/watchdog-spool` while Watchdog is unavailable. It applies a one-shot
+The mod records metadata-only session, subagent, and Kujo tool correlation
+only in projects with a valid `.kujo/cmd.json` (written by setup). Installing
+the mod globally does not send telemetry or create `.kujo/` in unconfigured
+projects. Set `KUJO_CMD_WATCHDOG=1` to explicitly enable recording without
+setup, or `KUJO_CMD_WATCHDOG=0` to disable it even in configured projects.
+Missing, unreadable, or malformed configuration disables recording by default.
+
+Records go to loopback Watchdog. Retryable delivery failures create a bounded
+queue of at most 100 batches under `.kujo/watchdog-spool/`; successful delivery
+does not create that directory. Setup, update, and repair add the narrow
+`/.kujo/watchdog-spool/` rule to the project's `.gitignore`, preserving existing
+rules. If opting in without setup, add that rule yourself. Pending batches
+are replayed only while recording is enabled. Uninstall retains the ignore
+rule so any remaining spool files stay ignored. It applies a one-shot
 Jidoka continuation when a Kujo MCP call fails. Set `KUJO_CMD_JIDOKA=0` to
 disable that gate or `KUJO_CMD_WATCHDOG_URL` to select another HTTPS or
 loopback endpoint. Set `KUJO_CMD_RUNLEDGER=1` to opt into automatic local

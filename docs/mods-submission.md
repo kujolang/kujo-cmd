@@ -7,16 +7,39 @@ metadata-only Watchdog correlation and a one-shot continuation after failed
 Kujo calls. The existing local MCP integration supplies repository checks,
 request-bound approvals, and receipts after an explicit setup step.
 
-This entry uses the existing `kujolang/kujo-cmd` GitHub package. Its manifest
+This entry uses the published `@kujolang/kujo-cmd` npm package. Its manifest
 points to the shipped TypeScript factory; no build or postinstall is needed
 when installing the mod. `setup --mod-mode package` configures the tools and
 migrates an owned projected bridge without registering a second copy.
 
 Append the object from `mods-registry-entry.json` to the upstream registry.
 The registered surfaces are `command` and `hook`. Do not mark this as an
-official Command Code mod. npm metadata can be added after 0.3.0 is published.
+official Command Code mod. Both `source` and `npm` identify `@kujolang/kujo-cmd`.
 
-## Verification record
+## 0.3.1 review remediation · 2026-10-23
+
+- Watchdog recording and replay require valid project configuration, or explicit
+  `KUJO_CMD_WATCHDOG=1`. `KUJO_CMD_WATCHDOG=0` disables both. No event payload,
+  network request, or spool directory is created for unconfigured projects.
+- Successful delivery does not create a spool directory. Retryable failures
+  retain at most 100 batches, replayed only while recording is enabled.
+- Setup, update, and repair add `/.kujo/watchdog-spool/` without replacing
+  existing ignore rules; repeated setup is idempotent and preserves CRLF.
+- README explains the seven agents' `permissionMode: dont-ask` and the separate
+  request-bound, one-use human approvals enforced by the Kujo runtime.
+- Registry identity: `kujo-cmd`; source and npm: `@kujolang/kujo-cmd`.
+- `npm test`: 25 passing tests, including consent, malformed configuration,
+  opt-out, replay, bounds, ignore rules, migration, and approval enforcement.
+- `npm run test:e2e`: 19 real tools passed, browser passed; profile inventories
+  5/18/29/38. Includes discovery, schemas, invocation, approvals, receipts,
+  concurrency, and restart. Uses local source checkouts.
+- `KUJO_CMD_LOCAL_ONLY=1 npm run test:command-code`: Command Code 1.85.1,
+  production-only tarball installation with scripts disabled, package migration,
+  MCP enabled, three skills, seven agents, and factory checks passed.
+- This release does not claim a new interactive/model-backed host check or
+  Desktop test; earlier records below retain their original dates and scope.
+
+## Earlier verification record
 
 Verified 2026-10-20 on macOS 26.6.2 x86_64, Node 26.7.0. The globally installed
 `command-code` and `cmd` were upgraded from 1.75.1 to 1.85.0 (npm latest at the

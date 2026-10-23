@@ -5,17 +5,17 @@ mod adds `/kujo` help/setup/status and lifecycle hooks. The existing MCP server
 supplies the Ability tools, request-bound approvals, and receipts. Installing
 only the mod does not configure MCP or download the Kujo tool sources.
 
-## Install from GitHub
+## Install the mod
 
 From the project you want to use with Kujo:
 
 ```sh
-cmd mods add kujolang/kujo-cmd
+cmd mods add @kujolang/kujo-cmd
 ```
 
-For a reproducible installation, append `@<commit-or-tag>` to that source.
+For a reproducible installation, use `@kujolang/kujo-cmd@0.3.1`.
 Start Command Code, trust the project, and use `/kujo` or `/kujo status`.
-The bridge is listed as `kujo-command-bridge` by `cmd mods list`.
+The registry entry is named `kujo-cmd`; its factory remains `kujo-command-bridge.ts`.
 
 Configure the tools using the CLI shipped in the installed package. Run
 `/kujo setup` inside Command Code: it prints the exact command for that package.
@@ -25,8 +25,7 @@ Run that command in your project terminal; its form is:
 node /absolute/path/to/installed/kujo-cmd/bin/kujo-cmd.mjs setup --mod-mode package
 ```
 
-This uses the same version as the installed mod without requiring an npm
-release. A Node version supported by `package.json`, Git, and the platform's optional Kujo runtime dependency are
+This uses the same version as the installed mod without downloading a second package version. A Node version supported by `package.json`, Git, and the platform's optional Kujo runtime dependency are
 required. Setup downloads pinned sources on first use, writes `.mcp.json`,
 links the active skills, and projects seven scoped agents. Restart Command Code
 after setup. Run `/kujo status` and ask it to call `kujo_ability_catalog` to
@@ -35,11 +34,11 @@ verify tool discovery. `kujo-cmd doctor` provides fuller local diagnostics.
 ## Install from npm
 
 ```sh
-cmd mods add @kujolang/kujo-cmd@0.3.0
-npx @kujolang/kujo-cmd@0.3.0 setup --mod-mode package
+cmd mods add @kujolang/kujo-cmd@0.3.1
+npx @kujolang/kujo-cmd@0.3.1 setup --mod-mode package
 ```
 
-Do not use an older npm version: it has no mod manifest. The `/kujo setup`
+Use 0.3.1 or newer for the project-configuration telemetry gate. The `/kujo setup`
 command prints the installed CLI’s exact path; it does not run installation, modify the project,
 spend model tokens, or grant approvals. There is no postinstall script.
 Command Code installs mod packages with npm lifecycle scripts disabled.
@@ -62,15 +61,19 @@ trust; global mods load for every project. `/kujo status` uses the host's
 workspace, not the process's initial working directory.
 
 To remove the entire integration, run `kujo-cmd uninstall` in the project,
-then `cmd mods remove kujolang/kujo-cmd` (or the npm source you installed).
+then `cmd mods remove @kujolang/kujo-cmd` (or the npm source you installed).
 Removing the mod alone leaves the independently configured MCP tools, skills,
 and agents. Uninstall preserves shared sources and receipts unless `--purge`
 is explicitly requested. Do not purge shared data still used by other projects.
 
 ## Behavior and boundaries
 
-- Hooks record metadata-only session, subagent, and Kujo tool events to local
-  Watchdog, with bounded on-disk spooling while it is unavailable.
+- Hooks record metadata-only session, subagent, and Kujo tool events only with
+  valid project configuration or `KUJO_CMD_WATCHDOG=1`. `KUJO_CMD_WATCHDOG=0`
+  disables recording and replay. Unconfigured projects stay untouched.
+- Retryable delivery failures spool at most 100 batches. Setup, update, and
+  repair add `/.kujo/watchdog-spool/` to `.gitignore`. Explicit opt-in without
+  setup requires adding the ignore rule yourself.
 - A failed Kujo MCP call permits one continuation per run. `KUJO_CMD_JIDOKA=0`
   disables it; it does not approve or automatically retry a mutating Ability.
 - RunLedger start/finish recording remains opt-in with `KUJO_CMD_RUNLEDGER=1`.
@@ -83,17 +86,14 @@ is explicitly requested. Do not purge shared data still used by other projects.
 
 ## Submit to the directory
 
-The prepared entry in `docs/mods-registry-entry.json` uses the GitHub source,
-so it can be submitted once this change is available on the repository's main
-branch. It intentionally omits `npm` until the mod-capable release is published.
-Open a PR adding that object to the `mods` array in
-[CommandCodeAI/command-code/mods/registry.json](https://github.com/CommandCodeAI/command-code/blob/main/mods/registry.json).
-Keep all existing entries. Maintainers review submissions; a package keyword
-or npm publication alone does not create a listing.
-
-If using npm instead, set both `source` and `npm` to `@kujolang/kujo-cmd`
-after verifying the published package contains the mod entrypoint. The correct
-kinds are `command` and `hook`: the mod's tools come through separate MCP setup.
+The prepared entry in `docs/mods-registry-entry.json` uses `kujo-cmd` as its
+registry name and `@kujolang/kujo-cmd` as both `source` and `npm`.
+Version 0.3.1 gates Watchdog recording on configuration or explicit opt-in.
+Add the object to the `mods` array in
+[CommandCodeAI/command-code/mods/registry.json](https://github.com/CommandCodeAI/command-code/blob/main/mods/registry.json),
+preserving existing entries. Maintainers review submissions; publication alone
+does not create a listing. The kinds are `command` and `hook`; tools come
+through separate MCP setup.
 A submission description is provided in `docs/mods-submission.md`.
 
 ## Verification

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 - 2026-10-23
+
+- Skip Watchdog recording, delivery, and replay in unconfigured projects unless
+  explicitly enabled with `KUJO_CMD_WATCHDOG=1`; `0` disables configured projects too.
+- Create the bounded spool only on retryable delivery failure; setup, update,
+  and repair preserve user ignore rules and add `/.kujo/watchdog-spool/`.
+- Clarify the seven agents' `dont-ask` mode and independent runtime human approvals.
+- Switch the mods directory entry and installation guidance to the npm package.
+- Add regression coverage for consent, malformed config, opt-out, replay, queue
+  bounds, successful delivery without writes, and idempotent ignore updates.
+
 ## 0.3.0 - 2026-10-21
 
 - Fix Lens readiness detection for Playwright headless-shell-only installs by
