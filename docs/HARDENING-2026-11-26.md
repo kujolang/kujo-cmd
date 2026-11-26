@@ -1,0 +1,10 @@
+# Kujo CMD repository hardening
+
+Baseline `7dedc53`. This pass reviewed the boundaries between Command Code, the framed MCP server, the local Ability runtime, the child tools, and the installed projections.
+
+- Kujo child tools resolve modules from their packaged entry points. Workspace paths remain available for project I/O. The launch environment discards inherited module roots and applies the same rule to wrapper scripts and the Watchdog service. [Kujo 1.8.0 import configuration](https://github.com/kujolang/kujo/blob/v1.8.0/src/module.rs).
+- MCP retains a single 1 MiB request frame, discards overlong frames through their delimiter, and honors stdout backpressure. It validates request shape and caps active calls at 32. Process timeouts and cancellation release child I/O. Watchdog response streams and receipt tails are bounded.
+- Runtime and source replacements are staged before activation. A refresh reuses clean source trees whose commit matches the catalog. A source acquisition failure preserves the installed checkout. Project projections reject symlinked path components and protect existing unowned skills from replacement.
+- Three focused installation and path checks failed on the baseline. The final package suite passed 31 tests on Node 22.23.4, 24.22.1, and 26.12.1. The end-to-end MCP suite used the published Kujo 1.8.0 npm binary, all 25 exact cached companion commits, and the pinned Lens headless Chromium shell. Setup, all four profiles, discovery, schemas, approved fixture calls, receipts, restart, and the loopback browser check passed. The packed CLI installed and completed setup in an empty consumer project. npm audit reported zero findings.
+
+The refresh benchmark compared 12 clean fixture checkouts with 1.44 MB of source text each. Across five pairs on Mac x86_64 with Node 24.22.1, median refresh time fell from 2,297 ms to 681 ms. Every pair retained the same checked-out byte digest. The fixture uses local Git and measures checkout work rather than hosted network latency.

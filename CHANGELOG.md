@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Isolate Kujo imports in trusted tool and service invocations.
+- Bound MCP framing, active calls, command output and local Watchdog responses.
+- Stage installer replacements and reuse clean checkouts already at their pins.
+- Validate projection paths before setup and cleanup, and bound local JSON reads.
+
 ## 0.3.1 - 2026-10-23
 
 - Skip Watchdog recording, delivery, and replay in unconfigured projects unless

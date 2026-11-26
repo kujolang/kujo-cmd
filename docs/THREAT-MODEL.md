@@ -22,7 +22,7 @@ local OS user is outside the isolation promise.
 | --- | --- | --- |
 | Malicious tool descriptions/schema poisoning | Catalog is package-owned, bounded, validated, versioned, and digest-addressed | Treat descriptions and results as untrusted model input |
 | Capability spoofing | Exact Ability ID/version/digest in discovery and receipt; source commits pinned and recorded | Git commit trust follows reviewed upstream refs |
-| Prompt injection from repository | JSON schema, profile exposure, separate policy, no shell interpolation | Read tools can still return malicious text to the model |
+| Prompt injection from repository | JSON schema, profile exposure, separate policy, isolated Kujo imports, no shell interpolation | Read tools can still return malicious text to the model |
 | Approval bypass/confused deputy | Non-read effects fail closed; approval is human CLI-only and bound to principal/digest/input/invocation/expiry | Command Code permission is not itself Kujo approval |
 | Approval replay | Cross-process locked state and one-time atomic consumption | Local state deletion invalidates history, not completed effects |
 | Duplicate effects | Cross-process keyed reservation, bounded sharded replay records, and fail-closed in-progress state | Evicted old keys are no longer replayable; a process killed after an external effect may leave an in-doubt reservation that requires receipt/artifact inspection and a deliberate new key |
@@ -37,7 +37,7 @@ local OS user is outside the isolation promise.
 | Watchdog PID reuse | Stored script identity is matched against the live command before stop signals | Process inspection depends on platform command-line reporting |
 | Cancellation ambiguity | Abort terminates child and emits cancelled receipt | External effects may race termination; inspect before retry |
 | Source/update compromise | Exact public commits, detached checkout, no lifecycle scripts from source repos | Commit allowlist updates require maintainer review |
-| Host/mod impersonation | No mod is installed; exact local MCP command path is generated | Untrusted projects can contain competing MCP configuration |
+| Host/mod impersonation | The bridge is projected from packaged assets or registered through the npm package. MCP configuration uses the exact local command | Untrusted projects can contain competing MCP configuration |
 
 Security rules are enforced by the local Ability host, not inferred from MCP
 annotations. Profiles reduce discovery but never grant authority. New

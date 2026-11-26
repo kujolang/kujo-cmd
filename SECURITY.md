@@ -17,8 +17,11 @@ Paths are resolved component-by-component beneath the configured project and
 symbolic links are rejected at every workspace boundary. Skill cleanup accepts
 only package-catalog direct-child names, and purge requires valid installation
 metadata plus a narrowly scoped data root. Child processes use argument arrays
-without a shell, output and execution time are bounded, and Watchdog accepts
-only loopback HTTP and verifies a stored process command before signaling it.
+without a shell. Kujo imports resolve from the trusted entry point while the
+child retains the workspace directory for project I/O. MCP framing, concurrent
+tool calls, command output and execution time are bounded. Watchdog accepts
+only loopback HTTP, bounds response reads, and verifies a stored process
+command before signaling it.
 Receipts are mode-0600 append-only local JSONL with bounded rotation and
 preserve host, session, run, agent, model, tool, Ability, effect, policy,
 approval, and artifact identity. Approval consumption and keyed idempotency use

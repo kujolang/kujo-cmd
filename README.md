@@ -152,6 +152,9 @@ not replace Kujo's request-bound approvals. The seven agents declare
 approval to mutating Kujo Abilities: the Kujo runtime still requires a human
 approval bound to the exact request, consumes it once, and records a receipt.
 An agent's tool allowlist or permission mode cannot bypass that runtime gate.
+Updates reuse clean checkouts that already match their pins. Use
+`kujo-cmd update --force` to reacquire the pinned sources.
+
 Shared sources and receipts default to
 `~/.local/share/kujo/cmd`. Set `KUJO_CMD_HOME` to move that data root.
 
