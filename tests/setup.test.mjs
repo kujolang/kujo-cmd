@@ -112,10 +112,13 @@ test("source updates reuse clean pins and preserve installed bytes when acquisit
   try {
     const catalog = { sources: [{ id:"fixture", repo:"fixtures/catalog", commit:stdout.trim() }] };
     const first = await installSources(catalog);
+    const installedFile = join(first.fixture.path,"README.md");
+    const originalBytes = await readFile(installedFile);
+    assert.match(originalBytes.toString("utf8"), /^Pinned fixture\r?\n$/);
     await rename(source, join(root,"source-offline"));
     assert.deepEqual(await installSources(catalog), first);
     await assert.rejects(() => installSources(catalog,{force:true}), /failed to acquire/);
-    assert.equal(await readFile(join(first.fixture.path,"README.md"),"utf8"), "Pinned fixture\n");
+    assert.deepEqual(await readFile(installedFile), originalBytes);
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];
