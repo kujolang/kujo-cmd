@@ -1,10 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handlers } from "../lib/executor.mjs";
+import { isolatedKujoEnvironment, run } from "../lib/process.mjs";
+import { readLastLines } from "../lib/io.mjs";
 import { installLensBrowser, lensBrowserStatus } from "../lib/lens.mjs";
 
 test("Watchdog telemetry adapter emits accepted metadata-only canonical v2", async () => {
@@ -58,4 +60,41 @@ test("Lens accepts a headless-shell-only install but rejects a browser that cann
   assert.equal(status.executable, undefined);
   await writeFile(join(moduleRoot, "index.js"), "module.exports={chromium:{async launch(){throw new Error('missing system dependency')}}};");
   assert.equal((await lensBrowserStatus(root)).ready, false);
+});
+
+test("trusted child imports are isolated and a pre-cancelled command never launches", async (t) => {
+  const env = isolatedKujoEnvironment({ KUJO_MODULE_PATH:"fixture-path", KUJO_ISOLATED_IMPORTS:"0", WDG_PORT:"7700" });
+  assert.equal(env.KUJO_ISOLATED_IMPORTS, "1");
+  assert.equal(env.KUJO_MODULE_PATH, undefined);
+  assert.equal(env.WDG_PORT, "7700");
+
+  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-cancel-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const marker = join(root, "ran.txt");
+  const signal = AbortSignal.abort();
+  const program = `require("node:fs").writeFileSync(${JSON.stringify(marker)}, "ran")`;
+  await assert.rejects(() => run(process.execPath, ["-e", program], { signal }), { name:"AbortError" });
+  await assert.rejects(() => readFile(marker), { code:"ENOENT" });
+  await assert.rejects(
+    () => run(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { timeoutMs:250 }),
+    { code:"ability_command_timeout" }
+  );
+});
+
+test("Watchdog response reads are bounded", async (t) => {
+  const server = createServer((_request, response) => response.end("x".repeat(512 * 1024 + 1)));
+  await new Promise((ready) => server.listen(0, "127.0.0.1", ready));
+  t.after(() => new Promise((close) => { server.close(close); server.closeAllConnections(); }));
+  const watchdog = handlers({config:{sources:{}}, project:process.cwd(), runtime:null}).watchdog;
+  await assert.rejects(() => watchdog({url:`http://127.0.0.1:${server.address().port}`}), { code:"ability_output_limit" });
+});
+
+test("bounded receipt reads omit incomplete leading records", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "kujo-receipt-tail-"));
+  t.after(() => rm(root, {recursive:true,force:true}));
+  const path = join(root, "receipts");
+  await writeFile(path, "x".repeat(100));
+  assert.deepEqual(await readLastLines(path, 2, 12), []);
+  await writeFile(path, `${"x".repeat(100)}\n{"id":2}\n`);
+  assert.deepEqual(await readLastLines(path, 2, 12), ['{"id":2}']);
 });
