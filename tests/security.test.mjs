@@ -1,11 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadProjectConfig } from "../lib/app.mjs";
 import { loadCatalog } from "../lib/catalog.mjs";
-import { removeCommandCodeAssets, removeProjectedSkills } from "../lib/install.mjs";
+import { checkCommandCodeAssets, projectSkills, removeCommandCodeAssets, removeProjectedSkills } from "../lib/install.mjs";
 import { writeInstallation } from "../lib/installation.mjs";
 import { assertSafePurgeRoot, homePaths, safeExistingDirectory, safeOutputPath } from "../lib/paths.mjs";
 
@@ -78,4 +78,32 @@ test("purge guard rejects roots that contain the user home or working directory"
   assert.throws(() => assertSafePurgeRoot(process.cwd()), { code: "kujo_purge_forbidden" });
   assert.doesNotThrow(() => assertSafePurgeRoot(join(tmpdir(), "kujo-cmd-owned-test-home")));
   assert.equal(homePaths().root.length > 0, true);
+});
+
+test("host projection requires real project-owned directories", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-projection-boundary-"));
+  t.after(() => rm(root, { recursive:true, force:true }));
+  const project = join(root, "project");
+  const sibling = join(root, "sibling");
+  await mkdir(project);
+  await mkdir(sibling);
+  await symlink(sibling, join(project, ".commandcode"), process.platform === "win32" ? "junction" : "dir");
+  await assert.rejects(() => checkCommandCodeAssets(project), { code:"ability_path_invalid" });
+});
+
+test("skill projection preserves an unowned directory with a catalog name", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "kujo-cmd-skill-conflict-"));
+  t.after(() => rm(root, { recursive:true, force:true }));
+  const project = join(root, "project");
+  const source = join(root, "canonical");
+  for (const name of ["kujo-scout-workflows","kujo-patchbrief-workflows","kujo-shipcheck-workflows"]) {
+    await mkdir(join(source,"skills",name), { recursive:true });
+  }
+  const existing = join(project,".agents","skills","kujo-scout-workflows");
+  await mkdir(existing, { recursive:true });
+  await writeFile(join(existing,"SKILL.md"), "Project instruction");
+  const catalog = await loadCatalog();
+  const config = { profile:"kujo.profile.essentials", enabled:[], disabled:[], sources:{"kujo-skills":{path:source,commit:"fixture"}} };
+  await assert.rejects(() => projectSkills(catalog,config,project), { code:"kujo_skill_conflict" });
+  assert.equal(await readFile(join(existing,"SKILL.md"),"utf8"), "Project instruction");
 });

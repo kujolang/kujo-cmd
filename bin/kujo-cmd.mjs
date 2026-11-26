@@ -8,8 +8,8 @@ import { loadCatalog, profileAbilities } from "../lib/catalog.mjs";
 import { checkCommandCodeAssets, configureMcp, configureWatchdogIgnore, installProjection, installSources, projectCommandCodeAssets, projectSkills, removeCommandCodeAssets, removeMcp, removeProjectedSkills } from "../lib/install.mjs";
 import { loadInstallation, writeInstallation } from "../lib/installation.mjs";
 import { readJson, writeJson } from "../lib/io.mjs";
-import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths } from "../lib/paths.mjs";
-import { run } from "../lib/process.mjs";
+import { assertSafePurgeRoot, homePaths, packageRoot, projectPaths, safeOutputPath } from "../lib/paths.mjs";
+import { isolatedKujoEnvironment, run } from "../lib/process.mjs";
 import { VERSION } from "../lib/version.mjs";
 import { installLensBrowser, lensBrowserStatus } from "../lib/lens.mjs";
 
@@ -37,7 +37,9 @@ async function exists(path) { try { await access(path); return true; } catch { r
 
 async function setup(opts) {
   const catalog = await loadCatalog(); const project = resolve(opts.project || process.cwd());
-  const previous = await readJson(projectPaths(project).config, null);
+  const projectPath = projectPaths(project);
+  for (const path of [projectPath.config, projectPath.projectionManifest, projectPath.mcp, projectPath.skillRoot]) await safeOutputPath(project, path);
+  const previous = await readJson(projectPath.config, null);
   const profile = opts.profile || previous?.profile || "kujo.profile.essentials";
   const modMode = opts["mod-mode"] || previous?.mod_mode || "projected";
   if (!["projected", "package"].includes(modMode)) throw new Error("--mod-mode must be projected or package");
@@ -149,7 +151,7 @@ async function services(opts) {
   const log = join(home.root, "watchdog.log"); const out = openSync(log, "a");
   const watchdogRoot = config.sources.watchdog.path;
   const script = join(watchdogRoot, "dashboard_server.kujo");
-  const child = spawn(runtime, ["run", "--interpreter", script], { cwd: watchdogRoot, detached: true, stdio: ["ignore", out, out], env: { ...process.env, WDG_HOST: "127.0.0.1", WDG_PORT: "7700", WDG_DB_PATH: join(serviceRoot, "data", "watchdog.db"), WDG_PROXY_CONFIG_PATH: join(serviceRoot, "proxy.json"), WDG_SOURCES_CONFIG_PATH: join(serviceRoot, "sources.json"), WDG_EXPORTERS_CONFIG_PATH: join(serviceRoot, "exporters.json"), WDG_BACKUP_DIR: join(serviceRoot, "data", "backups"), WDG_BACKUP_SCRIPT_PATH: join(watchdogRoot, "scripts", "watchdog_backup.js"), WDG_DITHER_CHARTS_JS_PATH: join(watchdogRoot, "vendor", "dither-charts.js"), WDG_DITHER_CHARTS_CSS_PATH: join(watchdogRoot, "vendor", "dither-charts.css"), WDG_DEPARTURE_MONO_PATH: join(watchdogRoot, "vendor", "fonts", "DepartureMono-Regular.woff2"), WDG_CONTEXT_LIMIT_CATALOG_PATH: join(watchdogRoot, "config", "context_limit_catalog.json") } }); closeSync(out); child.unref();
+  const child = spawn(runtime, ["run", "--interpreter", script], { cwd: watchdogRoot, detached: true, stdio: ["ignore", out, out], env: isolatedKujoEnvironment({ WDG_HOST: "127.0.0.1", WDG_PORT: "7700", WDG_DB_PATH: join(serviceRoot, "data", "watchdog.db"), WDG_PROXY_CONFIG_PATH: join(serviceRoot, "proxy.json"), WDG_SOURCES_CONFIG_PATH: join(serviceRoot, "sources.json"), WDG_EXPORTERS_CONFIG_PATH: join(serviceRoot, "exporters.json"), WDG_BACKUP_DIR: join(serviceRoot, "data", "backups"), WDG_BACKUP_SCRIPT_PATH: join(watchdogRoot, "scripts", "watchdog_backup.js"), WDG_DITHER_CHARTS_JS_PATH: join(watchdogRoot, "vendor", "dither-charts.js"), WDG_DITHER_CHARTS_CSS_PATH: join(watchdogRoot, "vendor", "dither-charts.css"), WDG_DEPARTURE_MONO_PATH: join(watchdogRoot, "vendor", "fonts", "DepartureMono-Regular.woff2"), WDG_CONTEXT_LIMIT_CATALOG_PATH: join(watchdogRoot, "config", "context_limit_catalog.json") }) }); closeSync(out); child.unref();
   let spawnError = null; child.once("error", (error) => { spawnError = error; });
   let healthy = false;
   for (let attempt = 0; attempt < 30 && !spawnError; attempt += 1) { try { const response = await fetch("http://127.0.0.1:7700/healthz", { signal: AbortSignal.timeout(500) }); if (response.ok) { healthy = true; break; } } catch {} await new Promise((resolveWait) => setTimeout(resolveWait, 250)); }
@@ -173,7 +175,7 @@ async function update(opts) {
   const catalog = await loadCatalog();
   const project = resolve(opts.project || process.cwd()); const { projectConfig, installation, paths } = await loadProjectConfig(project, catalog);
   const localSources = Object.values(installation.sources || {}).every((source) => source.mode === "local");
-  const sources = localSources && !opts["source-root"] ? installation.sources : await installSources(catalog, { sourceRoot: opts["source-root"], force: !opts["source-root"] });
+  const sources = localSources && !opts["source-root"] ? installation.sources : await installSources(catalog, { sourceRoot: opts["source-root"], force: opts.force });
   let runtime = process.env.KUJO_BIN;
   if (!runtime) {
     try { runtime = (await import("@kujolang/kujo-runtime")).resolveKujoBinary(); }
@@ -192,6 +194,7 @@ async function update(opts) {
 async function uninstall(opts) {
   const project = resolve(opts.project || process.cwd()); const paths = projectPaths(project); const catalog = await loadCatalog();
   if (opts.purge) await loadInstallation(catalog);
+  for (const path of [paths.config, paths.projectionManifest, paths.hostManifest, paths.mcp, paths.skillRoot]) await safeOutputPath(project, path);
   await removeMcp(project); await removeProjectedSkills(catalog, project); await removeCommandCodeAssets(project); await rm(paths.config, { force: true }); await rm(paths.projectionManifest, { force: true });
   if (opts.purge) await rm(assertSafePurgeRoot(homePaths().root), { recursive: true, force: true });
   output({ ok: true, message: `Kujo CMD removed from ${project}.${opts.purge ? " Shared local sources and receipts were purged." : " Shared local sources and receipts were preserved."}` }, opts.json);
